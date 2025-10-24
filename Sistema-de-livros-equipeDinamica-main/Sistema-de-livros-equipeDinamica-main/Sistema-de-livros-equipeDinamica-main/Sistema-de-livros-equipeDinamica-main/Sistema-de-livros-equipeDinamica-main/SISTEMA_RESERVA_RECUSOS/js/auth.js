@@ -1,84 +1,90 @@
+// ========== SISTEMA DE AUTENTICAÇÃO INTEGRADO ==========
 class SistemaAutenticacao {
     constructor() {
         this.usuarios = this.carregarUsuarios();
         this.usuarioLogado = this.carregarUsuarioLogado();
+        this.tentativasLogin = 0;
+        this.bloqueioTemporario = false;
         this.inicializarEventos();
         this.verificarUsuariosPreCadastrados();
+        console.log('🔐 Sistema de Autenticação inicializado');
     }
 
     carregarUsuarios() {
         let usuarios = ArmazenamentoLocal.carregar('biblioteca_usuarios');
         
-        if (!usuarios) {
-            console.log('Criando usuários pré-cadastrados...');
-            // Usuários pré-cadastrados para facilitar os testes
-            usuarios = [
-                {
-                    id: 'admin-001',
-                    nome: 'Administrador Sistema',
-                    email: 'admin@biblioteca.com',
-                    usuario: 'admin',
-                    senha: 'Admin123!',
-                    tipo: 'admin',
-                    dataCadastro: new Date().toISOString(),
-                    ativo: true,
-                    idade: 35,
-                    telefone: '(11) 99999-9999'
-                },
-                {
-                    id: 'user-001',
-                    nome: 'João Silva Santos',
-                    email: 'joao@email.com',
-                    usuario: 'joao',
-                    senha: 'Usuario123!',
-                    tipo: 'usuario',
-                    dataCadastro: new Date().toISOString(),
-                    ativo: true,
-                    idade: 25,
-                    telefone: '(11) 98888-8888'
-                },
-                {
-                    id: 'user-002', 
-                    nome: 'Maria Santos Oliveira',
-                    email: 'maria@email.com',
-                    usuario: 'maria',
-                    senha: 'Usuario123!',
-                    tipo: 'usuario',
-                    dataCadastro: new Date().toISOString(),
-                    ativo: true,
-                    idade: 28,
-                    telefone: '(11) 97777-7777'
-                },
-                {
-                    id: 'user-003',
-                    nome: 'Pedro Costa Lima',
-                    email: 'pedro@email.com',
-                    usuario: 'pedro',
-                    senha: 'Usuario123!',
-                    tipo: 'usuario',
-                    dataCadastro: new Date().toISOString(),
-                    ativo: true,
-                    idade: 19,
-                    telefone: '(11) 96666-6666'
-                }
-            ];
+        if (!usuarios || usuarios.length === 0) {
+            console.log('📝 Criando usuários pré-cadastrados...');
+            usuarios = this.criarUsuariosPadrao();
             ArmazenamentoLocal.salvar('biblioteca_usuarios', usuarios);
-        } else {
-            console.log('Usuários carregados do localStorage:', usuarios.length);
         }
         
         return usuarios;
     }
 
+    criarUsuariosPadrao() {
+        const timestamp = new Date().toISOString();
+        return [
+            {
+                id: 'admin-001',
+                nome: 'Administrador Principal',
+                email: 'admin@bibliotecacesf.com',
+                usuario: 'admin',
+                senha: 'Admin123!',
+                tipo: 'admin',
+                dataCadastro: timestamp,
+                ultimoAcesso: null,
+                ativo: true,
+                avatar: '👑',
+                temaPreferido: 'claro',
+                notificacoes: true
+            },
+            {
+                id: 'user-001',
+                nome: 'João Silva Santos',
+                email: 'joao.silva@email.com',
+                usuario: 'joao',
+                senha: 'Usuario123!',
+                tipo: 'usuario',
+                dataCadastro: timestamp,
+                ultimoAcesso: null,
+                ativo: true,
+                avatar: '👨‍💼',
+                temaPreferido: 'claro',
+                notificacoes: true
+            },
+            {
+                id: 'user-002',
+                nome: 'Maria Oliveira Costa',
+                email: 'maria.costa@email.com',
+                usuario: 'maria',
+                senha: 'Usuario123!',
+                tipo: 'usuario',
+                dataCadastro: timestamp,
+                ultimoAcesso: null,
+                ativo: true,
+                avatar: '👩‍🎓',
+                temaPreferido: 'claro',
+                notificacoes: true
+            }
+        ];
+    }
+
     carregarUsuarioLogado() {
         const usuarioSession = sessionStorage.getItem('usuario_logado');
-        const usuarioLocal = ArmazenamentoLocal.carregar('usuario_logado');
+        const usuarioLocal = localStorage.getItem('usuario_logado');
         
-        return usuarioSession ? JSON.parse(usuarioSession) : usuarioLocal;
+        if (usuarioSession) {
+            return JSON.parse(usuarioSession);
+        } else if (usuarioLocal) {
+            return JSON.parse(usuarioLocal);
+        }
+        
+        return null;
     }
 
     inicializarEventos() {
-        // Formulário de login
+        // Eventos de formulário
         const formLogin = document.getElementById('formLogin');
         if (formLogin) {
             formLogin.addEventListener('submit', (e) => {
@@ -87,7 +93,6 @@ class SistemaAutenticacao {
             });
         }
 
-        // Formulário de cadastro
         const formCadastro = document.getElementById('formCadastro');
         if (formCadastro) {
             formCadastro.addEventListener('submit', (e) => {
@@ -95,7 +100,7 @@ class SistemaAutenticacao {
                 this.realizarCadastro();
             });
 
-            // Validação de senha em tempo real
+            // Validação em tempo real
             const senhaInput = document.getElementById('inputSenhaCadastro');
             if (senhaInput) {
                 senhaInput.addEventListener('input', (e) => {
@@ -111,118 +116,101 @@ class SistemaAutenticacao {
             }
         }
 
-        // Eventos de teclado para login rápido
+        // Eventos de teclado para atalhos
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === '1') {
-                e.preventDefault();
-                loginRapido('admin');
-            } else if (e.ctrlKey && e.key === '2') {
-                e.preventDefault();
-                loginRapido('joao');
-            } else if (e.ctrlKey && e.key === '3') {
-                e.preventDefault();
-                loginRapido('maria');
+            if (e.ctrlKey && !e.shiftKey) {
+                switch(e.key) {
+                    case '1': e.preventDefault(); this.loginRapido('admin'); break;
+                    case '2': e.preventDefault(); this.loginRapido('joao'); break;
+                    case '3': e.preventDefault(); this.loginRapido('maria'); break;
+                }
             }
         });
     }
 
-    validarForcaSenha(senha) {
-        const forca = Validacoes.calcularForcaSenha(senha);
-        const barraForca = document.getElementById('barraForcaSenha');
-        const textoForca = document.getElementById('textoForcaSenha');
-
-        if (barraForca && textoForca) {
-            // Remover classes anteriores
-            barraForca.className = 'barra-forca-senha';
-            
-            // Adicionar classe baseada na força
-            if (forca <= 1) {
-                barraForca.classList.add('senha-fraca');
-            } else if (forca <= 3) {
-                barraForca.classList.add('senha-media');
-            } else if (forca <= 4) {
-                barraForca.classList.add('senha-forte');
-            } else {
-                barraForca.classList.add('senha-muito-forte');
-            }
-
-            textoForca.textContent = Validacoes.obterTextoForcaSenha(forca);
-        }
-    }
-
-    validarConfirmacaoSenha() {
-        const senha = document.getElementById('inputSenhaCadastro').value;
-        const confirmarSenha = document.getElementById('inputConfirmarSenha').value;
-        const confirmarSenhaInput = document.getElementById('inputConfirmarSenha');
-
-        if (confirmarSenhaInput) {
-            if (confirmarSenha && senha !== confirmarSenha) {
-                confirmarSenhaInput.style.borderColor = 'var(--vermelho)';
-                confirmarSenhaInput.title = 'As senhas não coincidem';
-            } else {
-                confirmarSenhaInput.style.borderColor = 'var(--cinza-claro)';
-                confirmarSenhaInput.title = '';
-            }
-        }
-    }
-
     realizarLogin() {
-        const usuarioInput = document.getElementById('inputUsuario').value.trim();
-        const senhaInput = document.getElementById('inputSenha').value;
-        const lembrarLogin = document.getElementById('lembrarLogin').checked;
+        if (this.bloqueioTemporario) {
+            mensagens.erro('Sistema temporariamente bloqueado. Tente novamente em alguns minutos.');
+            return;
+        }
 
-        // Validar campos
+        const usuarioInput = document.getElementById('inputUsuario');
+        const senhaInput = document.getElementById('inputSenha');
+        const lembrarLogin = document.getElementById('lembrarLogin');
+
         if (!usuarioInput || !senhaInput) {
+            mensagens.erro('Erro: Campos de login não encontrados.');
+            return;
+        }
+
+        const credencial = usuarioInput.value.trim();
+        const senha = senhaInput.value;
+        const lembrar = lembrarLogin ? lembrarLogin.checked : false;
+
+        // Validações básicas
+        if (!credencial || !senha) {
+            this.animacaoErroLogin();
             mensagens.erro('Por favor, preencha todos os campos.');
             return;
         }
 
         // Buscar usuário
-        const usuario = this.usuarios.find(u => 
-            (u.usuario === usuarioInput || u.email === usuarioInput) && 
-            u.senha === senhaInput && 
-            u.ativo
+        const usuarioEncontrado = this.usuarios.find(u => 
+            (u.usuario === credencial || u.email === credencial) && 
+            u.senha === senha && 
+            u.ativo === true
         );
 
-        if (usuario) {
-            this.usuarioLogado = usuario;
+        if (usuarioEncontrado) {
+            // Login bem-sucedido
+            this.tentativasLogin = 0;
+            this.usuarioLogado = usuarioEncontrado;
             
+            // Atualizar último acesso
+            usuarioEncontrado.ultimoAcesso = new Date().toISOString();
+            ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
+
             // Salvar sessão
-            if (lembrarLogin) {
-                ArmazenamentoLocal.salvar('usuario_logado', usuario);
+            if (lembrar) {
+                localStorage.setItem('usuario_logado', JSON.stringify(usuarioEncontrado));
             } else {
-                sessionStorage.setItem('usuario_logado', JSON.stringify(usuario));
+                sessionStorage.setItem('usuario_logado', JSON.stringify(usuarioEncontrado));
             }
 
-            // Adicionar notificação de login
-            sistemaNotificacoes.adicionarNotificacao(
-                'Login Realizado',
-                `Bem-vindo(a) de volta, ${usuario.nome.split(' ')[0]}!`,
-                'sucesso'
-            );
-
-            mensagens.sucesso(`Bem-vindo(a) de volta, ${usuario.nome.split(' ')[0]}!`);
-            this.entrarNoSistema();
-        } else {
-            mensagens.erro('Usuário ou senha incorretos.');
+            this.animacaoSucessoLogin();
+            mensagens.sucesso(`Bem-vindo(a) de volta, ${usuarioEncontrado.nome.split(' ')[0]}! 🎉`);
             
-            // Adicionar notificação de tentativa de login falha
-            sistemaNotificacoes.adicionarNotificacao(
-                'Tentativa de Login',
-                `Tentativa de login falhou para: ${usuarioInput}`,
-                'erro'
-            );
+            setTimeout(() => {
+                this.entrarNoSistema();
+            }, 1000);
+
+        } else {
+            // Login falhou
+            this.tentativasLogin++;
+            this.animacaoErroLogin();
+            
+            if (this.tentativasLogin >= 5) {
+                this.bloqueioTemporario = true;
+                mensagens.erro('Muitas tentativas falhas. Sistema bloqueado por 2 minutos.');
+                setTimeout(() => {
+                    this.bloqueioTemporario = false;
+                    this.tentativasLogin = 0;
+                    mensagens.info('Sistema desbloqueado. Você pode tentar novamente.');
+                }, 120000);
+            } else {
+                const tentativasRestantes = 5 - this.tentativasLogin;
+                mensagens.erro(`Credenciais inválidas. ${tentativasRestantes} tentativas restantes.`);
+            }
         }
     }
 
     realizarCadastro() {
-        const nome = document.getElementById('inputNomeCompleto').value.trim();
-        const email = document.getElementById('inputEmail').value.trim().toLowerCase();
-        const usuario = document.getElementById('inputUsuarioCadastro').value.trim();
-        const senha = document.getElementById('inputSenhaCadastro').value;
-        const confirmarSenha = document.getElementById('inputConfirmarSenha').value;
-        const tipo = document.getElementById('selectTipoUsuario').value;
-        const termos = document.getElementById('checkTermos').checked;
+        const nome = document.getElementById('inputNomeCompleto')?.value.trim();
+        const email = document.getElementById('inputEmail')?.value.trim();
+        const usuario = document.getElementById('inputUsuarioCadastro')?.value.trim();
+        const senha = document.getElementById('inputSenhaCadastro')?.value;
+        const confirmarSenha = document.getElementById('inputConfirmarSenha')?.value;
+        const termos = document.getElementById('checkTermos')?.checked;
 
         // Validações
         if (!nome || !email || !usuario || !senha || !confirmarSenha) {
@@ -230,8 +218,18 @@ class SistemaAutenticacao {
             return;
         }
 
+        if (!this.validarNomeCompleto(nome)) {
+            mensagens.erro('Por favor, insira seu nome completo (mínimo 2 palavras).');
+            return;
+        }
+
         if (!Validacoes.validarEmail(email)) {
             mensagens.erro('Por favor, insira um e-mail válido.');
+            return;
+        }
+
+        if (!this.validarUsuario(usuario)) {
+            mensagens.erro('Nome de usuário deve ter entre 3 e 20 caracteres e conter apenas letras, números e underline.');
             return;
         }
 
@@ -246,11 +244,11 @@ class SistemaAutenticacao {
         }
 
         if (!termos) {
-            mensagens.erro('Você deve aceitar os termos de uso.');
+            mensagens.erro('Você deve aceitar os termos de uso e política de privacidade.');
             return;
         }
 
-        // Verificar se usuário ou email já existem
+        // Verificar duplicatas
         if (this.usuarios.find(u => u.usuario === usuario)) {
             mensagens.erro('Este nome de usuário já está em uso.');
             return;
@@ -265,58 +263,130 @@ class SistemaAutenticacao {
         const novoUsuario = {
             id: GeradorID.gerar(),
             nome: nome,
-            email: email,
-            usuario: usuario,
+            email: email.toLowerCase(),
+            usuario: usuario.toLowerCase(),
             senha: senha,
-            tipo: tipo,
+            tipo: 'usuario',
             dataCadastro: new Date().toISOString(),
+            ultimoAcesso: null,
             ativo: true,
-            idade: null,
-            telefone: ''
+            avatar: this.gerarAvatarAleatorio(),
+            temaPreferido: 'claro',
+            notificacoes: true,
+            livrosFavoritos: [],
+            historicoBusca: []
         };
 
         this.usuarios.push(novoUsuario);
         ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
 
-        // Notificação de novo cadastro
-        sistemaNotificacoes.adicionarNotificacao(
-            'Novo Usuário',
-            `${nome} acabou de se cadastrar no sistema`,
-            'info'
-        );
+        mensagens.sucesso('Cadastro realizado com sucesso! 🎊 Você já pode fazer login.');
+        
+        // Animação de sucesso
+        this.animacaoSucessoCadastro();
+        
+        setTimeout(() => {
+            this.fecharModal('modalCadastro');
+            this.mostrarLogin();
+        }, 1500);
+    }
 
-        mensagens.sucesso('Cadastro realizado com sucesso! Você já pode fazer login.');
-        this.fecharModal('modalCadastro');
-        this.mostrarLogin();
+    validarNomeCompleto(nome) {
+        return nome.split(' ').length >= 2 && nome.length >= 5;
+    }
+
+    validarUsuario(usuario) {
+        const regex = /^[a-zA-Z0-9_]{3,20}$/;
+        return regex.test(usuario);
+    }
+
+    validarForcaSenha(senha) {
+        const forca = Validacoes.calcularForcaSenha(senha);
+        const barraForca = document.getElementById('barraForcaSenha');
+        const textoForca = document.getElementById('textoForcaSenha');
+
+        if (barraForca && textoForca) {
+            // Resetar classes
+            barraForca.className = 'barra-forca-senha';
+            textoForca.className = 'texto-forca-senha';
+            
+            // Adicionar classes baseadas na força
+            if (forca <= 1) {
+                barraForca.classList.add('senha-fraca');
+                textoForca.classList.add('senha-fraca');
+                textoForca.textContent = 'Senha fraca';
+            } else if (forca <= 2) {
+                barraForca.classList.add('senha-media');
+                textoForca.classList.add('senha-media');
+                textoForca.textContent = 'Senha média';
+            } else if (forca <= 3) {
+                barraForca.classList.add('senha-forte');
+                textoForca.classList.add('senha-forte');
+                textoForca.textContent = 'Senha forte';
+            } else {
+                barraForca.classList.add('senha-muito-forte');
+                textoForca.classList.add('senha-muito-forte');
+                textoForca.textContent = 'Senha muito forte';
+            }
+        }
+    }
+
+    validarConfirmacaoSenha() {
+        const senha = document.getElementById('inputSenhaCadastro')?.value;
+        const confirmarSenha = document.getElementById('inputConfirmarSenha')?.value;
+        const confirmarInput = document.getElementById('inputConfirmarSenha');
+
+        if (confirmarInput) {
+            if (confirmarSenha && senha !== confirmarSenha) {
+                confirmarInput.classList.add('erro-validacao');
+            } else {
+                confirmarInput.classList.remove('erro-validacao');
+            }
+        }
     }
 
     entrarNoSistema() {
-        document.getElementById('telaInicio').style.display = 'none';
-        document.getElementById('sistemaPrincipal').style.display = 'block';
+        const telaInicio = document.getElementById('telaInicio');
+        const sistemaPrincipal = document.getElementById('sistemaPrincipal');
         
-        this.atualizarInterfaceUsuario();
-        this.fecharModal('modalLogin');
+        if (telaInicio && sistemaPrincipal) {
+            // Animação de saída
+            telaInicio.style.opacity = '0';
+            telaInicio.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                telaInicio.style.display = 'none';
+                sistemaPrincipal.style.display = 'block';
+                
+                // Animação de entrada
+                sistemaPrincipal.style.opacity = '0';
+                sistemaPrincipal.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    sistemaPrincipal.style.opacity = '1';
+                    sistemaPrincipal.style.transform = 'translateY(0)';
+                    sistemaPrincipal.style.transition = 'all 0.5s ease';
+                }, 50);
+                
+                this.atualizarInterfaceUsuario();
+                this.fecharModal('modalLogin');
+                
+                // Inicializar sistemas dependentes
+                if (typeof sistemaLivros !== 'undefined') {
+                    sistemaLivros.carregarLivros();
+                }
+                
+                if (typeof sistemaAdmin !== 'undefined' && this.isAdmin()) {
+                    sistemaAdmin.mostrarAreaAdmin();
+                }
 
-        // Inicializar outros sistemas
-        if (typeof sistemaLivros !== 'undefined') {
-            sistemaLivros.carregarLivros();
-            sistemaLivros.carregarDestaques();
-        }
-
-        if (typeof sistemaAdmin !== 'undefined' && this.usuarioLogado.tipo === 'admin') {
-            sistemaAdmin.mostrarAreaAdmin();
-        }
-
-        // Inicializar sistema de parceria se existir
-        if (typeof sistemaParceria !== 'undefined') {
-            sistemaParceria.inicializar();
+            }, 300);
         }
     }
 
     atualizarInterfaceUsuario() {
         const saudacao = document.getElementById('saudacaoUsuario');
         const areaAdmin = document.getElementById('areaAdministrativa');
-        const botaoAdminFixo = document.getElementById('botaoAdminFixo');
 
         if (saudacao && this.usuarioLogado) {
             const hora = new Date().getHours();
@@ -325,70 +395,70 @@ class SistemaAutenticacao {
             if (hora < 12) cumprimento = 'Bom dia';
             else if (hora < 18) cumprimento = 'Boa tarde';
 
-            saudacao.textContent = `${cumprimento}, ${this.usuarioLogado.nome.split(' ')[0]}!`;
-            
-            // Adicionar badge de tipo de usuário
-            if (this.usuarioLogado.tipo === 'admin') {
-                saudacao.innerHTML += ` <span class="badge-admin">ADMIN</span>`;
-            }
+            saudacao.innerHTML = `
+                <span class="avatar-usuario">${this.usuarioLogado.avatar}</span>
+                <span class="texto-saudacao">${cumprimento}, <strong>${this.usuarioLogado.nome.split(' ')[0]}</strong>!</span>
+            `;
         }
 
-        // Mostrar/ocultar área administrativa e botão fixo
-        if (areaAdmin && botaoAdminFixo) {
-            if (this.usuarioLogado && this.usuarioLogado.tipo === 'admin') {
-                areaAdmin.style.display = 'block';
-                botaoAdminFixo.style.display = 'block';
-                
-                // Carregar dados do admin
-                setTimeout(() => {
-                    if (typeof sistemaAdmin !== 'undefined') {
-                        sistemaAdmin.carregarDadosDashboard();
-                    }
-                }, 100);
-            } else {
-                areaAdmin.style.display = 'none';
-                botaoAdminFixo.style.display = 'none';
-            }
+        // Controles administrativos
+        if (this.isAdmin()) {
+            if (areaAdmin) areaAdmin.style.display = 'block';
+        } else {
+            if (areaAdmin) areaAdmin.style.display = 'none';
+        }
+
+        // Aplicar tema preferido do usuário
+        if (this.usuarioLogado.temaPreferido && typeof sistemaTema !== 'undefined') {
+            sistemaTema.temaAtual = this.usuarioLogado.temaPreferido;
+            sistemaTema.aplicarTema();
         }
     }
 
     sair() {
-        const usuarioNome = this.usuarioLogado ? this.usuarioLogado.nome.split(' ')[0] : 'Usuário';
+        const sistemaPrincipal = document.getElementById('sistemaPrincipal');
+        const telaInicio = document.getElementById('telaInicio');
         
-        this.usuarioLogado = null;
-        ArmazenamentoLocal.remover('usuario_logado');
-        sessionStorage.removeItem('usuario_logado');
-
-        document.getElementById('sistemaPrincipal').style.display = 'none';
-        document.getElementById('telaInicio').style.display = 'flex';
-
-        // Notificação de logout
-        sistemaNotificacoes.adicionarNotificacao(
-            'Logout',
-            `${usuarioNome} saiu do sistema`,
-            'info'
-        );
-
-        mensagens.info('Você saiu do sistema. Volte sempre!');
+        if (sistemaPrincipal && telaInicio) {
+            // Animação de saída
+            sistemaPrincipal.style.opacity = '0';
+            sistemaPrincipal.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                // Limpar dados de sessão
+                this.usuarioLogado = null;
+                sessionStorage.removeItem('usuario_logado');
+                localStorage.removeItem('usuario_logado');
+                
+                sistemaPrincipal.style.display = 'none';
+                telaInicio.style.display = 'flex';
+                
+                // Animação de entrada
+                telaInicio.style.opacity = '0';
+                telaInicio.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    telaInicio.style.opacity = '1';
+                    telaInicio.style.transform = 'translateY(0)';
+                    telaInicio.style.transition = 'all 0.5s ease';
+                }, 50);
+                
+                mensagens.info('Você saiu do sistema. Até logo! 👋');
+            }, 300);
+        }
     }
 
-    // Métodos para modais
+    // Sistema de Modais
     mostrarLogin() {
         this.abrirModal('modalLogin');
-        // Resetar formulário
-        const form = document.getElementById('formLogin');
-        if (form) form.reset();
+        setTimeout(() => {
+            document.getElementById('inputUsuario')?.focus();
+        }, 300);
     }
 
     mostrarCadastro() {
         this.abrirModal('modalCadastro');
-        // Resetar formulário e indicadores
-        const form = document.getElementById('formCadastro');
-        if (form) {
-            form.reset();
-            this.validarForcaSenha('');
-            this.validarConfirmacaoSenha();
-        }
+        this.resetarFormularioCadastro();
     }
 
     abrirModal(modalId) {
@@ -399,8 +469,9 @@ class SistemaAutenticacao {
             
             // Animação de entrada
             setTimeout(() => {
-                modal.style.opacity = '1';
-                modal.querySelector('.modal-conteudo').style.transform = 'scale(1)';
+                modal.classList.add('mostrar');
+                const conteudo = modal.querySelector('.modal-conteudo');
+                if (conteudo) conteudo.classList.add('mostrar');
             }, 10);
         }
     }
@@ -408,8 +479,10 @@ class SistemaAutenticacao {
     fecharModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
-            modal.style.opacity = '0';
-            modal.querySelector('.modal-conteudo').style.transform = 'scale(0.9)';
+            const conteudo = modal.querySelector('.modal-conteudo');
+            if (conteudo) conteudo.classList.remove('mostrar');
+            
+            modal.classList.remove('mostrar');
             
             setTimeout(() => {
                 modal.style.display = 'none';
@@ -420,24 +493,96 @@ class SistemaAutenticacao {
 
     entrarComoConvidado() {
         this.usuarioLogado = {
-            id: 'convidado-' + GeradorID.gerar(),
+            id: 'convidado-' + Date.now(),
             nome: 'Visitante Convidado',
             tipo: 'convidado',
+            avatar: '👀',
             dataCadastro: new Date().toISOString()
         };
 
-        // Notificação de acesso convidado
-        sistemaNotificacoes.adicionarNotificacao(
-            'Acesso Convidado',
-            'Um visitante está explorando o sistema como convidado',
-            'info'
-        );
-
         mensagens.info('Entrando como convidado. Algumas funcionalidades estarão limitadas.');
-        this.entrarNoSistema();
+        
+        setTimeout(() => {
+            this.entrarNoSistema();
+        }, 1000);
     }
 
-    // Getters
+    // Login Rápido para Desenvolvimento
+    loginRapido(usuario) {
+        const usuarioEncontrado = this.usuarios.find(u => u.usuario === usuario && u.ativo);
+        
+        if (usuarioEncontrado) {
+            // Preencher formulário automaticamente
+            const usuarioInput = document.getElementById('inputUsuario');
+            const senhaInput = document.getElementById('inputSenha');
+            const lembrarInput = document.getElementById('lembrarLogin');
+            
+            if (usuarioInput && senhaInput) {
+                usuarioInput.value = usuarioEncontrado.usuario;
+                senhaInput.value = usuarioEncontrado.senha;
+                if (lembrarInput) lembrarInput.checked = true;
+                
+                mensagens.info(`Preenchido: ${usuarioEncontrado.nome} - Pressione Enter para logar`);
+                
+                // Focar no campo de senha para facilitar Enter
+                senhaInput.focus();
+            }
+        } else {
+            mensagens.erro(`Usuário "${usuario}" não encontrado.`);
+        }
+    }
+
+    // Animações
+    animacaoSucessoLogin() {
+        const modal = document.getElementById('modalLogin');
+        const conteudo = modal?.querySelector('.modal-conteudo');
+        
+        if (conteudo) {
+            conteudo.style.animation = 'pulseSuccess 0.5s ease-out';
+            setTimeout(() => {
+                conteudo.style.animation = '';
+            }, 500);
+        }
+    }
+
+    animacaoErroLogin() {
+        const modal = document.getElementById('modalLogin');
+        const conteudo = modal?.querySelector('.modal-conteudo');
+        
+        if (conteudo) {
+            conteudo.style.animation = 'shake 0.5s ease-out';
+            setTimeout(() => {
+                conteudo.style.animation = '';
+            }, 500);
+        }
+    }
+
+    animacaoSucessoCadastro() {
+        const modal = document.getElementById('modalCadastro');
+        const conteudo = modal?.querySelector('.modal-conteudo');
+        
+        if (conteudo) {
+            conteudo.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                conteudo.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }
+
+    resetarFormularioCadastro() {
+        const form = document.getElementById('formCadastro');
+        if (form) form.reset();
+        
+        this.validarForcaSenha('');
+        this.validarConfirmacaoSenha();
+    }
+
+    gerarAvatarAleatorio() {
+        const avatares = ['👦', '👧', '👨', '👩', '🧑', '👨‍🎓', '👩‍🎓', '👨‍💼', '👩‍💼'];
+        return avatares[Math.floor(Math.random() * avatares.length)];
+    }
+
+    // Getters e verificações
     getUsuarioLogado() {
         return this.usuarioLogado;
     }
@@ -450,61 +595,52 @@ class SistemaAutenticacao {
         return this.usuarioLogado && this.usuarioLogado.tipo === 'convidado';
     }
 
+    isUsuarioComum() {
+        return this.usuarioLogado && this.usuarioLogado.tipo === 'usuario';
+    }
+
     // Verificação e criação de usuários pré-cadastrados
     verificarUsuariosPreCadastrados() {
-        console.log('Verificando usuários pré-cadastrados...');
-        
-        const usuariosEsperados = ['admin', 'joao', 'maria', 'pedro'];
-        let usuariosCriados = 0;
+        const usuariosEsperados = ['admin', 'joao', 'maria'];
+        let usuariosFaltantes = [];
         
         usuariosEsperados.forEach(usuario => {
-            const encontrado = this.usuarios.find(u => u.usuario === usuario);
-            if (!encontrado) {
-                console.log(`Criando usuário ${usuario}...`);
-                this.criarUsuarioPreCadastrado(usuario);
-                usuariosCriados++;
+            if (!this.usuarios.find(u => u.usuario === usuario)) {
+                usuariosFaltantes.push(usuario);
             }
         });
         
-        if (usuariosCriados > 0) {
+        if (usuariosFaltantes.length > 0) {
+            console.log('🔧 Criando usuários faltantes:', usuariosFaltantes);
+            usuariosFaltantes.forEach(usuario => {
+                this.criarUsuarioPreCadastrado(usuario);
+            });
             ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
-            console.log(`${usuariosCriados} usuários pré-cadastrados criados com sucesso!`);
         }
     }
 
     criarUsuarioPreCadastrado(usuario) {
         const usuariosBase = {
             'admin': {
-                nome: 'Administrador Sistema',
-                email: 'admin@biblioteca.com',
+                nome: 'Administrador Principal',
+                email: 'admin@bibliotecacesf.com',
                 senha: 'Admin123!',
                 tipo: 'admin',
-                idade: 35,
-                telefone: '(11) 99999-9999'
+                avatar: '👑'
             },
             'joao': {
                 nome: 'João Silva Santos',
-                email: 'joao@email.com',
+                email: 'joao.silva@email.com',
                 senha: 'Usuario123!',
                 tipo: 'usuario',
-                idade: 25,
-                telefone: '(11) 98888-8888'
+                avatar: '👨‍💼'
             },
             'maria': {
-                nome: 'Maria Santos Oliveira',
-                email: 'maria@email.com', 
+                nome: 'Maria Oliveira Costa',
+                email: 'maria.costa@email.com',
                 senha: 'Usuario123!',
                 tipo: 'usuario',
-                idade: 28,
-                telefone: '(11) 97777-7777'
-            },
-            'pedro': {
-                nome: 'Pedro Costa Lima',
-                email: 'pedro@email.com',
-                senha: 'Usuario123!',
-                tipo: 'usuario',
-                idade: 19,
-                telefone: '(11) 96666-6666'
+                avatar: '👩‍🎓'
             }
         };
 
@@ -518,56 +654,23 @@ class SistemaAutenticacao {
                 senha: dados.senha,
                 tipo: dados.tipo,
                 dataCadastro: new Date().toISOString(),
+                ultimoAcesso: null,
                 ativo: true,
-                idade: dados.idade,
-                telefone: dados.telefone
+                avatar: dados.avatar,
+                temaPreferido: 'claro',
+                notificacoes: true
             };
 
             this.usuarios.push(novoUsuario);
-            console.log(`Usuário ${usuario} criado:`, novoUsuario);
+            console.log(`✅ Usuário ${usuario} criado com sucesso`);
         }
-    }
-
-    // Métodos para gerenciamento de usuários (admin)
-    getTodosUsuarios() {
-        return this.usuarios.filter(u => u.tipo !== 'convidado');
-    }
-
-    ativarUsuario(usuarioId) {
-        const usuario = this.usuarios.find(u => u.id === usuarioId);
-        if (usuario) {
-            usuario.ativo = true;
-            ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
-            return true;
-        }
-        return false;
-    }
-
-    desativarUsuario(usuarioId) {
-        const usuario = this.usuarios.find(u => u.id === usuarioId);
-        if (usuario && usuario.id !== this.usuarioLogado?.id) {
-            usuario.ativo = false;
-            ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
-            return true;
-        }
-        return false;
-    }
-
-    editarUsuario(usuarioId, dadosAtualizados) {
-        const usuarioIndex = this.usuarios.findIndex(u => u.id === usuarioId);
-        if (usuarioIndex !== -1) {
-            this.usuarios[usuarioIndex] = { ...this.usuarios[usuarioIndex], ...dadosAtualizados };
-            ArmazenamentoLocal.salvar('biblioteca_usuarios', this.usuarios);
-            return true;
-        }
-        return false;
     }
 }
 
-// Inicializar sistema de autenticação
+// ========== INICIALIZAÇÃO DO SISTEMA ==========
 const sistemaAuth = new SistemaAutenticacao();
 
-// Funções globais para os eventos do HTML
+// ========== FUNÇÕES GLOBAIS PARA HTML ==========
 function mostrarLogin() {
     sistemaAuth.mostrarLogin();
 }
@@ -588,62 +691,21 @@ function sair() {
     sistemaAuth.sair();
 }
 
-function alternarTema() {
-    // Esta função será implementada no main.js
-    if (typeof sistemaTema !== 'undefined') {
-        sistemaTema.alternarTema();
-    }
-}
-
-function abrirNotificacoes() {
-    // Esta função será implementada no main.js
-    if (typeof sistemaNotificacoes !== 'undefined') {
-        sistemaNotificacoes.abrirPainelNotificacoes();
-    }
-}
-
-// Sistema de Login Rápido Melhorado
 function loginRapido(usuario) {
-    console.log('Tentando login rápido para:', usuario);
-    
-    // Buscar o usuário no sistema de autenticação
-    const usuarioEncontrado = sistemaAuth.usuarios.find(u => {
-        return u.usuario === usuario && u.ativo;
-    });
-
-    console.log('Usuário encontrado:', usuarioEncontrado ? 'SIM' : 'NÃO');
-
-    if (usuarioEncontrado) {
-        // Preencher automaticamente o formulário
-        document.getElementById('inputUsuario').value = usuarioEncontrado.usuario;
-        document.getElementById('inputSenha').value = usuarioEncontrado.senha;
-        document.getElementById('lembrarLogin').checked = true;
-        
-        // Realizar login automaticamente após breve delay
-        setTimeout(() => {
-            sistemaAuth.realizarLogin();
-        }, 500);
-        
-        return true;
-    } else {
-        mensagens.erro(`Usuário "${usuario}" não encontrado ou inativo.`);
-        return false;
-    }
+    sistemaAuth.loginRapido(usuario);
 }
 
-// Atalhos de teclado para desenvolvimento
+// ========== INICIALIZAÇÃO E CONFIGURAÇÃO ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Adicionar informação sobre atalhos no console
-    console.log('%c🚀 Atalhos de Desenvolvimento Disponíveis:', 'color: #D4AF37; font-weight: bold; font-size: 14px;');
-    console.log('%cCtrl+1 - Login como Admin\nCtrl+2 - Login como João\nCtrl+3 - Login como Maria', 'color: #8B0000;');
+    console.log('🚀 Sistema de Autenticação carregado com sucesso!');
     
-    // Verificar se está em localhost para mostrar atalhos
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('%c🔧 Modo Desenvolvimento Ativo', 'color: #28a745; font-weight: bold;');
+    // Verificar se há usuário logado ao carregar a página
+    if (sistemaAuth.getUsuarioLogado()) {
+        sistemaAuth.entrarNoSistema();
     }
 });
 
-// Garantir que os usuários pré-cadastrados existam
-setTimeout(() => {
-    sistemaAuth.verificarUsuariosPreCadastrados();
-}, 1000);
+// ========== CONSOLE HELPER ==========
+console.log('%c🔐 Sistema de Autenticação Pronto!', 'color: #8B0000; font-weight: bold; font-size: 16px;');
+console.log('%cAtalhos de Desenvolvimento:', 'color: #D4AF37; font-weight: bold;');
+console.log('%cCtrl+1 - Admin | Ctrl+2 - João | Ctrl+3 - Maria', 'color: #8B0000;');
