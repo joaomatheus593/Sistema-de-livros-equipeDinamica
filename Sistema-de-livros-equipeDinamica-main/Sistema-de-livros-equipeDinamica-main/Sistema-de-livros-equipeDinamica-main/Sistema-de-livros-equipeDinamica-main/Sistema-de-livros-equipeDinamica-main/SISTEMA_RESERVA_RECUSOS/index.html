@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Cesf Online</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- Tela de Início -->
+    <div id="telaInicio" class="tela-inicio">
+        <div class="container-inicio">
+            <div class="header-inicio">
+                <div class="logo-inicio">
+                    <div class="logo-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="logo-texto">
+                        <h1>Biblioteca Cesf Online</h1>
+                        <p class="slogan">Em parceria com Biblioteca Cesta - Sagrada Família</p>
+                    </div>
+                </div>
+                <div class="badge-parceria">
+                    <i class="fas fa-handshake"></i>
+                    Parceria Ativa
+                </div>
+            </div>
+
+            <div class="opcoes-entrada">
+                <div class="card-opcao" onclick="mostrarCadastro()">
+                    <div class="card-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>Criar Conta</h3>
+                    <p>Cadastre-se para acessar todos os recursos</p>
+                    <button class="botao botao-primario">
+                        <i class="fas fa-rocket"></i>
+                        Começar
+                    </button>
+                </div>
+
+                <div class="card-opcao" onclick="mostrarLogin()">
+                    <div class="card-icon">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <h3>Fazer Login</h3>
+                    <p>Acesse sua conta existente</p>
+                    <button class="botao botao-secundario">
+                        <i class="fas fa-key"></i>
+                        Entrar
+                    </button>
+                </div>
+
+                <div class="card-opcao" onclick="entrarComoConvidado()">
+                    <div class="card-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Convidado</h3>
+                    <p>Explore os livros sem cadastro</p>
+                    <button class="botao botao-convidado">
+                        <i class="fas fa-binoculars"></i>
+                        Explorar
+                    </button>
+                </div>
+            </div>
+
+            <div class="recursos-inicio">
+                <div class="recurso-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h4>Livros Físicos</h4>
+                    <p>Peça livros da Biblioteca Cesta</p>
+                </div>
+                <div class="recurso-item">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Rápido</h4>
+                    <p>Empréstimos em poucos cliques</p>
+                </div>
+                <div class="recurso-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Seguro</h4>
+                    <p>Seus dados protegidos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Principal -->
+    <div id="sistemaPrincipal" style="display: none;">
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="nav-principal">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="logo-texto">
+                            <h1>Biblioteca Cesf</h1>
+                            <span class="logo-subtitulo">Parceria Cesta</span>
+                        </div>
+                    </div>
+                    
+                    <div class="acoes-nav">
+                        <div id="infoUsuario" class="info-usuario">
+                            <span class="saudacao" id="saudacaoUsuario"></span>
+                            <div class="controles-usuario">
+                                <button class="botao botao-icon" onclick="alternarTema()" title="Alterar tema">
+                                    <i class="fas fa-palette"></i>
+                                </button>
+                                <button class="botao botao-icon" onclick="abrirNotificacoes()" title="Notificações">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="contador-notificacoes" id="contadorNotificacoes">0</span>
+                                </button>
+                                <button class="botao botao-secundario" onclick="sair()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Sair
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Botão Admin Fixo -->
+        <div id="botaoAdminFixo" class="botao-admin-fixo" style="display: none;">
+            <button class="botao botao-primario" onclick="scrollParaAdmin()">
+                <i class="fas fa-cogs"></i>
+                Painel Admin
+            </button>
+        </div>
+
+        <!-- Barra de Pesquisa -->
+        <section class="busca-section">
+            <div class="container">
+                <div class="barra-pesquisa-avancada">
+                    <div class="campo-pesquisa-principal">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="campoPesquisa" placeholder="Pesquisar livros, autores, gêneros...">
+                        <button class="botao botao-primario" onclick="realizarPesquisa()">
+                            <i class="fas fa-search"></i>
+                            Buscar
+                        </button>
+                    </div>
+                    
+                    <div class="filtros-avancados">
+                        <div class="filtro-grupo">
+                            <label for="filtroGenero">Gênero</label>
+                            <select id="filtroGenero" onchange="aplicarFiltros()">
+                                <option value="">Todos os gêneros</option>
+                                <option value="ficcao">Ficção</option>
+                                <option value="romance">Romance</option>
+                                <option value="fantasia">Fantasia</option>
+                                <option value="aventura">Aventura</option>
+                                <option value="misterio">Mistério</option>
+                                <option value="biografia">Biografia</option>
+                                <option value="historia">História</option>
+                                <option value="ciencia">Ciência</option>
+                                <option value="tecnologia">Tecnologia</option>
+                                <option value="autoajuda">Autoajuda</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label for="filtroAno">Ano</label>
+                            <select id="filtroAno" onchange="aplicarFiltros()">
+                                <option value="">Todos os anos</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label for="filtroDisponibilidade">Disponibilidade</label>
+                            <select id="filtroDisponibilidade" onchange="aplicarFiltros()">
+                                <option value="">Todos</option>
+                                <option value="disponivel">Disponíveis</option>
+                                <option value="indisponivel">Indisponíveis</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filtro-grupo">
+                            <label for="filtroOrdenacao">Ordenar por</label>
+                            <select id="filtroOrdenacao" onchange="aplicarFiltros()">
+                                <option value="relevancia">Relevância</option>
+                                <option value="titulo">Título A-Z</option>
+                                <option value="titulo-desc">Título Z-A</option>
+                                <option value="ano">Ano (Mais Recente)</option>
+                                <option value="ano-desc">Ano (Mais Antigo)</option>
+                                <option value="avaliacao">Melhor Avaliado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conteúdo Principal -->
+        <main class="container">
+            <!-- Seção de Destaques -->
+            <section class="destaques-section">
+                <h2 class="titulo-secao">
+                    <i class="fas fa-star"></i>
+                    Livros em Destaque
+                </h2>
+                <div class="carrossel-destaques" id="carrosselDestaques">
+                    <!-- Destaques carregados via JavaScript -->
+                </div>
+            </section>
+
+            <!-- Catálogo de Livros -->
+            <section class="catalogo-section">
+                <div class="cabecalho-catalogo">
+                    <h2 class="titulo-secao">
+                        <i class="fas fa-book"></i>
+                        Catálogo Completo
+                    </h2>
+                    <div class="controles-catalogo">
+                        <div class="controle-exibicao">
+                            <span>Visualização:</span>
+                            <div class="botoes-tamanho">
+                                <button class="botao-tamanho ativo" data-tamanho="pequeno" onclick="alterarTamanhoExibicao('pequeno')">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button class="botao-tamanho" data-tamanho="medio" onclick="alterarTamanhoExibicao('medio')">
+                                    <i class="fas fa-th-large"></i>
+                                </button>
+                                <button class="botao-tamanho" data-tamanho="grande" onclick="alterarTamanhoExibicao('grande')">
+                                    <i class="fas fa-th-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="info-resultados">
+                            <span id="totalLivrosEncontrados">0</span> livros encontrados
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grade-livros" id="gradeLivros">
+                    <!-- Livros carregados via JavaScript -->
+                </div>
+
+                <div class="controles-paginacao">
+                    <div class="paginacao" id="paginacao">
+                        <!-- Paginação gerada via JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Área Administrativa -->
+            <section id="areaAdministrativa" class="admin-section" style="display: none;">
+                <!-- Conteúdo do Admin será carregado aqui -->
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="conteudo-footer">
+                    <div class="secao-footer">
+                        <div class="logo-footer">
+                            <i class="fas fa-book-open"></i>
+                            <div>
+                                <h3>Biblioteca Cesf Online</h3>
+                                <p>Parceria com Biblioteca Cesta</p>
+                            </div>
+                        </div>
+                        <p class="descricao-footer">
+                            Sistema integrado de gerenciamento de biblioteca digital e física 
+                            com catálogo completo, empréstimos online e ferramentas avançadas.
+                        </p>
+                    </div>
+
+                    <div class="secao-footer">
+                        <h4>Links Rápidos</h4>
+                        <ul class="links-footer">
+                            <li><a href="#" onclick="filtrarPorGenero('')">Catálogo Completo</a></li>
+                            <li><a href="#" onclick="filtrarPorDisponibilidade('disponivel')">Livros Disponíveis</a></li>
+                            <li><a href="#" onclick="sistemaParceria.mostrarModal()">Pedir Livro Físico</a></li>
+                            <li><a href="#" onclick="abrirModal('modalPoliticaPrivacidade')">Política de Privacidade</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="secao-footer">
+                        <h4>Contato</h4>
+                        <div class="info-contato">
+                            <p><i class="fas fa-map-marker-alt"></i> Rua das Bibliotecas, 123 - Centro</p>
+                            <p><i class="fas fa-phone"></i> (11) 3456-7890</p>
+                            <p><i class="fas fa-envelope"></i> contato@bibliotecacesf.com</p>
+                            <p><i class="fas fa-clock"></i> Segunda a Sexta: 8h às 18h</p>
+                        </div>
+                    </div>
+
+                    <div class="secao-footer">
+                        <h4>Parceria</h4>
+                        <div class="parceria-info">
+                            <div class="logo-parceiro">
+                                <i class="fas fa-school"></i>
+                                <strong>Biblioteca Cesta</strong>
+                            </div>
+                            <p>Colégio Sagrada Família</p>
+                            <p>Campo Largo - PR</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rodape-footer">
+                    <p>&copy; 2024 Biblioteca Cesf Online. Todos os direitos reservados.</p>
+                    <div class="links-rodape">
+                        <a href="#" onclick="abrirModal('modalPoliticaPrivacidade')">Política de Privacidade</a>
+                        <a href="#">Termos de Uso</a>
+                        <a href="#">Suporte</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal Login -->
+<div id="modalLogin" class="modal">
+    <div class="modal-conteudo">
+        <div class="modal-header">
+            <h2>Login</h2>
+            <button class="btn-fechar" onclick="fecharModal('modalLogin')">&times;</button>
+        </div>
+        <form id="formLogin">
+            <input type="text" id="inputUsuario" placeholder="Usuário ou E-mail" required>
+            <input type="password" id="inputSenha" placeholder="Senha" required>
+            <label>
+                <input type="checkbox" id="lembrarLogin"> Lembrar login
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Cadastro -->
+<div id="modalCadastro" class="modal">
+    <div class="modal-conteudo">
+        <div class="modal-header">
+            <h2>Cadastro</h2>
+            <button class="btn-fechar" onclick="fecharModal('modalCadastro')">&times;</button>
+        </div>
+        <form id="formCadastro">
+            <input type="text" id="inputNomeCompleto" placeholder="Nome Completo" required>
+            <input type="email" id="inputEmail" placeholder="E-mail" required>
+            <input type="text" id="inputUsuarioCadastro" placeholder="Nome de Usuário" required>
+            <input type="password" id="inputSenhaCadastro" placeholder="Senha" required>
+            <div id="indicadorForcaSenha">
+                <div id="barraForcaSenha" class="barra-forca-senha"></div>
+                <span id="textoForcaSenha"></span>
+            </div>
+            <input type="password" id="inputConfirmarSenha" placeholder="Confirmar Senha" required>
+            <select id="selectTipoUsuario">
+                <option value="usuario">Usuário</option>
+                <option value="admin">Administrador</option>
+            </select>
+            <label>
+                <input type="checkbox" id="checkTermos"> Aceito os termos de uso
+            </label>
+            <button type="submit">Cadastrar</button>
+        </form>
+    </div>
+</div>
+                <div class="rodape-modal">
+                    <p>Já tem uma conta? <a href="#" onclick="fecharModal('modalCadastro'); mostrarLogin()">Faça login aqui</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Livro -->
+    <div id="modalDetalhesLivro" class="modal modal-grande">
+        <div class="modal-conteudo">
+            <div class="modal-cabecalho">
+                <h2><i class="fas fa-book"></i> Detalhes do Livro</h2>
+                <button class="fechar-modal" onclick="fecharModal('modalDetalhesLivro')">&times;</button>
+            </div>
+            <div class="modal-corpo" id="conteudoDetalhesLivro">
+                <!-- Conteúdo carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Política de Privacidade -->
+    <div id="modalPoliticaPrivacidade" class="modal">
+        <div class="modal-conteudo modal-grande">
+            <div class="modal-cabecalho">
+                <h2><i class="fas fa-shield-alt"></i> Política de Privacidade</h2>
+                <button class="fechar-modal" onclick="fecharModal('modalPoliticaPrivacidade')">&times;</button>
+            </div>
+            <div class="modal-corpo">
+                <div class="politica-conteudo">
+                    <!-- Conteúdo da política de privacidade -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pedido Livro Físico -->
+    <div id="modalPedidoLivro" class="modal">
+        <div class="modal-conteudo">
+            <div class="modal-cabecalho">
+                <h2><i class="fas fa-shipping-fast"></i> Pedir Livro Físico</h2>
+                <button class="fechar-modal" onclick="fecharModal('modalPedidoLivro')">&times;</button>
+            </div>
+            <div class="modal-corpo" id="conteudoPedidoLivro">
+                <!-- Conteúdo carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Mensagens -->
+    <div id="sistemaMensagens" class="sistema-mensagens"></div>
+
+    <!-- Painel de Notificações -->
+    <div id="painelNotificacoes" class="painel-notificacoes" style="display: none;"></div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/books.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
