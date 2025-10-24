@@ -1,20 +1,16 @@
-class SistemaAdministrativo {
+class SistemaAdministrativoCompacto {
     constructor() {
         this.painelAtual = 'dashboard';
-        this.dadosDashboard = null;
         this.inicializarEventos();
-        this.carregarInterfaceAdmin();
     }
 
     inicializarEventos() {
-        // Formulário de adicionar livro será configurado dinamicamente
+        // Configurar formulário de livros
         this.configurarFormularioLivros();
         
-        // Carregar dados quando a área admin for acessada
+        // Carregar dados iniciais se for admin
         if (sistemaAuth.isAdmin()) {
-            setTimeout(() => {
-                this.carregarDadosDashboard();
-            }, 500);
+            this.carregarDadosDashboard();
         }
     }
 
@@ -22,7 +18,14 @@ class SistemaAdministrativo {
         const areaAdmin = document.getElementById('areaAdministrativa');
         if (!areaAdmin) return;
 
-        areaAdmin.innerHTML = `
+        areaAdmin.style.display = 'block';
+        areaAdmin.innerHTML = this.gerarHTMLAdmin();
+        this.configurarFormularioLivros();
+        this.carregarDadosDashboard();
+    }
+
+    gerarHTMLAdmin() {
+        return `
             <div class="cabecalho-admin">
                 <h2 class="titulo-secao">
                     <i class="fas fa-cogs"></i>
@@ -31,15 +34,11 @@ class SistemaAdministrativo {
                 <div class="controles-admin">
                     <button class="botao botao-primario" onclick="sistemaAdmin.gerarRelatorio()">
                         <i class="fas fa-file-export"></i>
-                        Exportar Relatório
+                        Relatório
                     </button>
-                    <button class="botao botao-backup" onclick="sistemaAdmin.fazerBackup()">
+                    <button class="botao botao-secundario" onclick="sistemaAdmin.fazerBackup()">
                         <i class="fas fa-download"></i>
                         Backup
-                    </button>
-                    <button class="botao botao-restaurar" onclick="sistemaAdmin.restaurarBackup()">
-                        <i class="fas fa-upload"></i>
-                        Restaurar
                     </button>
                 </div>
             </div>
@@ -57,25 +56,19 @@ class SistemaAdministrativo {
                             <li>
                                 <a href="#" class="item-menu" data-painel="livros" onclick="sistemaAdmin.abrirPainelAdmin('livros')">
                                     <i class="fas fa-book"></i>
-                                    <span>Gerenciar Livros</span>
+                                    <span>Livros</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#" class="item-menu" data-painel="adicionar-livro" onclick="sistemaAdmin.abrirPainelAdmin('adicionar-livro')">
                                     <i class="fas fa-plus-circle"></i>
-                                    <span>Adicionar Livro</span>
+                                    <span>Adicionar</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#" class="item-menu" data-painel="emprestimos" onclick="sistemaAdmin.abrirPainelAdmin('emprestimos')">
                                     <i class="fas fa-hand-holding"></i>
                                     <span>Empréstimos</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" class="item-menu" data-painel="pedidos-fisicos" onclick="sistemaAdmin.abrirPainelAdmin('pedidos-fisicos')">
-                                    <i class="fas fa-shipping-fast"></i>
-                                    <span>Pedidos Físicos</span>
                                 </a>
                             </li>
                             <li>
@@ -101,387 +94,300 @@ class SistemaAdministrativo {
                 </div>
 
                 <div class="conteudo-admin">
-                    <!-- Dashboard -->
-                    <div id="painelDashboard" class="painel-conteudo ativo">
-                        <div class="cabecalho-painel">
-                            <h3>Dashboard - Visão Geral</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.atualizarDashboard()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    Atualizar
-                                </button>
-                            </div>
+                    ${this.gerarPainelDashboard()}
+                    ${this.gerarPainelLivros()}
+                    ${this.gerarPainelAdicionarLivro()}
+                    ${this.gerarPainelEmprestimos()}
+                    ${this.gerarPainelUsuarios()}
+                    ${this.gerarPainelComentarios()}
+                    ${this.gerarPainelConfiguracoes()}
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelDashboard() {
+        return `
+            <div id="painelDashboard" class="painel-conteudo ativo">
+                <div class="cabecalho-painel">
+                    <h3>Visão Geral</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-primario" onclick="sistemaAdmin.atualizarDashboard()">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div id="conteudoDashboard">
+                    <div class="carregando-compacto"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelLivros() {
+        return `
+            <div id="painelLivros" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Gerenciar Livros</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-primario" onclick="sistemaAdmin.abrirPainelAdmin('adicionar-livro')">
+                            <i class="fas fa-plus"></i>
+                            Novo Livro
+                        </button>
+                    </div>
+                </div>
+                <div class="tabela-container">
+                    <table class="tabela-admin">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Gênero</th>
+                                <th>Estoque</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaLivrosBody">
+                            <tr>
+                                <td colspan="5" class="carregando-compacto">Carregando livros...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelAdicionarLivro() {
+        return `
+            <div id="painelAdicionarLivro" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Adicionar Livro</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-secundario" onclick="sistemaAdmin.limparFormularioLivro()">
+                            <i class="fas fa-eraser"></i>
+                            Limpar
+                        </button>
+                    </div>
+                </div>
+                <form id="formAdicionarLivro" class="formulario-admin-compacto">
+                    <div class="formulario-linha-compacta">
+                        <div class="campo-formulario-compacto">
+                            <label for="tituloLivro">Título *</label>
+                            <input type="text" id="tituloLivro" required>
                         </div>
-                        <div id="conteudoDashboard">
-                            <div class="carregando"></div>
+                        <div class="campo-formulario-compacto">
+                            <label for="autorLivro">Autor *</label>
+                            <input type="text" id="autorLivro" required>
                         </div>
                     </div>
 
-                    <!-- Gerenciar Livros -->
-                    <div id="painelLivros" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Gerenciar Livros</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.abrirPainelAdmin('adicionar-livro')">
-                                    <i class="fas fa-plus"></i>
-                                    Novo Livro
-                                </button>
-                                <button class="botao botao-secundario" onclick="sistemaAdmin.exportarCatalogo()">
-                                    <i class="fas fa-file-csv"></i>
-                                    Exportar CSV
-                                </button>
-                            </div>
+                    <div class="formulario-linha-compacta">
+                        <div class="campo-formulario-compacto">
+                            <label for="generoLivro">Gênero *</label>
+                            <select id="generoLivro" required>
+                                <option value="">Selecione...</option>
+                                <option value="ficcao">Ficção</option>
+                                <option value="romance">Romance</option>
+                                <option value="fantasia">Fantasia</option>
+                                <option value="aventura">Aventura</option>
+                                <option value="misterio">Mistério</option>
+                            </select>
                         </div>
-                        <div class="tabela-container">
-                            <table class="tabela-admin">
-                                <thead>
-                                    <tr>
-                                        <th>Título</th>
-                                        <th>Autor</th>
-                                        <th>Gênero</th>
-                                        <th>Ano</th>
-                                        <th>Estoque</th>
-                                        <th>Status</th>
-                                        <th>Físico</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaLivrosBody">
-                                    <tr>
-                                        <td colspan="8" class="carregando-linha">Carregando livros...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="campo-formulario-compacto">
+                            <label for="anoLivro">Ano *</label>
+                            <input type="number" id="anoLivro" min="1000" max="2024" required>
                         </div>
                     </div>
 
-                    <!-- Adicionar Livro -->
-                    <div id="painelAdicionarLivro" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Adicionar Novo Livro</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-secundario" onclick="sistemaAdmin.limparFormularioLivro()">
-                                    <i class="fas fa-eraser"></i>
-                                    Limpar
-                                </button>
-                            </div>
+                    <div class="formulario-linha-compacta">
+                        <div class="campo-formulario-compacto">
+                            <label for="estoqueLivro">Estoque *</label>
+                            <input type="number" id="estoqueLivro" min="0" value="1" required>
                         </div>
-                        <form id="formAdicionarLivro" class="formulario-admin">
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="tituloLivro">Título do Livro *</label>
-                                    <input type="text" id="tituloLivro" required placeholder="Digite o título completo">
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="autorLivro">Autor *</label>
-                                    <input type="text" id="autorLivro" required placeholder="Nome do autor">
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="generoLivro">Gênero *</label>
-                                    <select id="generoLivro" required>
-                                        <option value="">Selecione o gênero</option>
-                                        <option value="ficcao">Ficção</option>
-                                        <option value="romance">Romance</option>
-                                        <option value="fantasia">Fantasia</option>
-                                        <option value="aventura">Aventura</option>
-                                        <option value="misterio">Mistério</option>
-                                        <option value="biografia">Biografia</option>
-                                        <option value="historia">História</option>
-                                        <option value="ciencia">Ciência</option>
-                                        <option value="tecnologia">Tecnologia</option>
-                                        <option value="autoajuda">Autoajuda</option>
-                                    </select>
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="anoLivro">Ano de Publicação *</label>
-                                    <input type="number" id="anoLivro" min="1000" max="2024" required placeholder="2024">
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="editoraLivro">Editora *</label>
-                                    <input type="text" id="editoraLivro" required placeholder="Nome da editora">
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="paginasLivro">Número de Páginas</label>
-                                    <input type="number" id="paginasLivro" min="1" placeholder="Ex: 256">
-                                </div>
-                            </div>
-
-                            <div class="campo-formulario campo-grande">
-                                <label for="sinopseLivro">Sinopse *</label>
-                                <textarea id="sinopseLivro" rows="4" required placeholder="Descreva a sinopse do livro..."></textarea>
-                            </div>
-
-                            <div class="campo-formulario campo-grande">
-                                <label for="descricaoLivro">Descrição Detalhada</label>
-                                <textarea id="descricaoLivro" rows="3" placeholder="Descrição adicional (opcional)..."></textarea>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="imagemLivro">URL da Capa</label>
-                                    <input type="text" id="imagemLivro" placeholder="https://exemplo.com/capa.jpg">
-                                    <small>Deixe em branco para usar imagem padrão</small>
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="estoqueLivro">Quantidade em Estoque *</label>
-                                    <input type="number" id="estoqueLivro" min="0" value="1" required>
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="classificacaoEtaria">Classificação Etária</label>
-                                    <select id="classificacaoEtaria">
-                                        <option value="L">L - Livre</option>
-                                        <option value="10">10 anos</option>
-                                        <option value="12">12 anos</option>
-                                        <option value="14">14 anos</option>
-                                        <option value="16">16 anos</option>
-                                        <option value="18">18 anos</option>
-                                    </select>
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="isbnLivro">ISBN</label>
-                                    <input type="text" id="isbnLivro" placeholder="ISBN do livro">
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="valorEmprestimo">Valor do Empréstimo (R$)</label>
-                                    <input type="number" id="valorEmprestimo" min="0" step="0.01" value="0">
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="taxaJuros">Taxa de Juros Diária (%)</label>
-                                    <input type="number" id="taxaJuros" min="0" step="0.01" value="0.5">
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label for="prazoEmprestimo">Prazo de Empréstimo (dias)</label>
-                                    <input type="number" id="prazoEmprestimo" min="1" value="14">
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="localizacaoFisica">Localização Física</label>
-                                    <input type="text" id="localizacaoFisica" placeholder="Ex: Prateleira A-12">
-                                </div>
-                            </div>
-
-                            <div class="formulario-linha">
-                                <div class="campo-formulario">
-                                    <label class="checkbox">
-                                        <input type="checkbox" id="destaqueLivro">
-                                        <span class="checkmark"></span>
-                                        Destacar este livro
-                                    </label>
-                                </div>
-                                <div class="campo-formulario">
-                                    <label class="checkbox">
-                                        <input type="checkbox" id="fisicoDisponivel" checked>
-                                        <span class="checkmark"></span>
-                                        Disponível fisicamente
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="campo-formulario">
-                                <label for="tagsLivro">Tags (separadas por vírgula)</label>
-                                <input type="text" id="tagsLivro" placeholder="Ex: fantasia, aventura, magia">
-                                <small>Palavras-chave para melhorar a busca</small>
-                            </div>
-
-                            <div class="acoes-formulario">
-                                <button type="submit" class="botao botao-primario">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Adicionar Livro
-                                </button>
-                                <button type="button" class="botao botao-secundario" onclick="sistemaAdmin.limparFormularioLivro()">
-                                    <i class="fas fa-eraser"></i>
-                                    Limpar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Empréstimos -->
-                    <div id="painelEmprestimos" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Gerenciar Empréstimos</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelEmprestimos()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    Atualizar
-                                </button>
-                            </div>
-                        </div>
-                        <div id="conteudoEmprestimos">
-                            <div class="carregando"></div>
+                        <div class="campo-formulario-compacto">
+                            <label for="imagemLivro">Capa (URL)</label>
+                            <input type="text" id="imagemLivro">
                         </div>
                     </div>
 
-                    <!-- Pedidos Físicos -->
-                    <div id="painelPedidosFisicos" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Pedidos de Livros Físicos</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelPedidosFisicos()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    Atualizar
-                                </button>
-                            </div>
-                        </div>
-                        <div id="conteudoPedidosFisicos">
-                            <div class="carregando"></div>
+                    <div class="campo-formulario-compacto">
+                        <label for="sinopseLivro">Sinopse *</label>
+                        <textarea id="sinopseLivro" rows="3" required></textarea>
+                    </div>
+
+                    <div class="acoes-formulario-compacto">
+                        <button type="submit" class="botao botao-primario">
+                            <i class="fas fa-plus-circle"></i>
+                            Adicionar Livro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+    }
+
+    gerarPainelEmprestimos() {
+        return `
+            <div id="painelEmprestimos" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Empréstimos Ativos</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelEmprestimos()">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div id="conteudoEmprestimos">
+                    <div class="carregando-compacto"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelUsuarios() {
+        return `
+            <div id="painelUsuarios" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Gerenciar Usuários</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelUsuarios()">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="tabela-container">
+                    <table class="tabela-admin">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaUsuariosBody">
+                            <tr>
+                                <td colspan="5" class="carregando-compacto">Carregando usuários...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelComentarios() {
+        return `
+            <div id="painelComentarios" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Comentários Pendentes</h3>
+                    <div class="controles-painel">
+                        <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelComentarios()">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div id="conteudoComentarios">
+                    <div class="carregando-compacto"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    gerarPainelConfiguracoes() {
+        return `
+            <div id="painelConfiguracoes" class="painel-conteudo">
+                <div class="cabecalho-painel">
+                    <h3>Configurações</h3>
+                </div>
+                <div class="configuracoes-compactas">
+                    <div class="configuracao-card-compacto">
+                        <h4><i class="fas fa-palette"></i> Aparência</h4>
+                        <div class="configuracao-opcoes-compactas">
+                            <button class="botao ${sistemaTema.temaAtual === 'claro' ? 'botao-primario' : 'botao-secundario'}" 
+                                    onclick="sistemaTema.alternarTema()">
+                                <i class="fas ${sistemaTema.temaAtual === 'claro' ? 'fa-moon' : 'fa-sun'}"></i>
+                                Tema ${sistemaTema.temaAtual === 'claro' ? 'Escuro' : 'Claro'}
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Usuários -->
-                    <div id="painelUsuarios" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Gerenciar Usuários</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelUsuarios()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    Atualizar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="tabela-container">
-                            <table class="tabela-admin">
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Usuário</th>
-                                        <th>E-mail</th>
-                                        <th>Tipo</th>
-                                        <th>Data Cadastro</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaUsuariosBody">
-                                    <tr>
-                                        <td colspan="7" class="carregando-linha">Carregando usuários...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="configuracao-card-compacto">
+                        <h4><i class="fas fa-database"></i> Dados</h4>
+                        <div class="configuracao-opcoes-compactas">
+                            <button class="botao botao-primario" onclick="sistemaAdmin.fazerBackup()">
+                                <i class="fas fa-download"></i>
+                                Fazer Backup
+                            </button>
+                            <button class="botao botao-secundario" onclick="sistemaAdmin.limparDados()">
+                                <i class="fas fa-trash"></i>
+                                Limpar Dados
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Comentários -->
-                    <div id="painelComentarios" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Gerenciar Comentários</h3>
-                            <div class="controles-painel">
-                                <button class="botao botao-primario" onclick="sistemaAdmin.carregarPainelComentarios()">
-                                    <i class="fas fa-sync-alt"></i>
-                                    Atualizar
-                                </button>
-                            </div>
-                        </div>
-                        <div id="conteudoComentarios">
-                            <div class="carregando"></div>
-                        </div>
-                    </div>
-
-                    <!-- Configurações -->
-                    <div id="painelConfiguracoes" class="painel-conteudo">
-                        <div class="cabecalho-painel">
-                            <h3>Configurações do Sistema</h3>
-                        </div>
-                        <div id="conteudoConfiguracoes">
-                            <div class="carregando"></div>
+                    <div class="configuracao-card-compacto">
+                        <h4><i class="fas fa-book"></i> Catálogo</h4>
+                        <div class="configuracao-opcoes-compactas">
+                            <button class="botao botao-primario" onclick="sistemaLivros.carregarMaisLivrosExemplo()">
+                                <i class="fas fa-plus"></i>
+                                Livros Exemplo
+                            </button>
+                            <button class="botao botao-secundario" onclick="sistemaAdmin.exportarCatalogo()">
+                                <i class="fas fa-file-csv"></i>
+                                Exportar CSV
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
-
-        // Configurar eventos após carregar a interface
-        this.configurarFormularioLivros();
     }
 
     configurarFormularioLivros() {
-        const formAdicionarLivro = document.getElementById('formAdicionarLivro');
-        if (formAdicionarLivro) {
-            formAdicionarLivro.addEventListener('submit', (e) => {
+        const form = document.getElementById('formAdicionarLivro');
+        if (form) {
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.adicionarLivro();
             });
         }
     }
 
-    mostrarAreaAdmin() {
-        document.getElementById('areaAdministrativa').style.display = 'block';
-        this.carregarDadosDashboard();
-    }
-
     abrirPainelAdmin(painel) {
-        console.log('Abrindo painel:', painel);
-        
         // Esconder todos os painéis
         document.querySelectorAll('.painel-conteudo').forEach(p => {
             p.classList.remove('ativo');
-            p.style.display = 'none';
         });
-    
-        // Remover classe ativa de todos os itens do menu
+
+        // Remover classe ativa do menu
         document.querySelectorAll('.item-menu').forEach(item => {
             item.classList.remove('ativo');
         });
-    
+
         // Mostrar painel selecionado
-        const painelId = this.obterIdPainel(painel);
-        const painelElement = document.getElementById(painelId);
-        
-        console.log('Procurando painel:', painelId, 'Elemento:', painelElement);
-        
+        const painelElement = document.getElementById(`painel${this.capitalizar(painel)}`);
         if (painelElement) {
             painelElement.classList.add('ativo');
-            painelElement.style.display = 'block';
-            console.log('Painel encontrado e mostrado');
-        } else {
-            console.error('Painel não encontrado:', painelId);
-            mensagens.erro(`Painel "${painel}" não encontrado.`);
-            return;
         }
-    
+
         // Ativar item do menu
         const itemMenu = document.querySelector(`.item-menu[data-painel="${painel}"]`);
         if (itemMenu) {
             itemMenu.classList.add('ativo');
         }
-    
+
         this.painelAtual = painel;
-    
-        // Carregar dados específicos do painel
         this.carregarDadosPainel(painel);
     }
-    
-    obterIdPainel(painel) {
-        const mapeamento = {
-            'dashboard': 'painelDashboard',
-            'livros': 'painelLivros',
-            'adicionar-livro': 'painelAdicionarLivro',
-            'emprestimos': 'painelEmprestimos',
-            'pedidos-fisicos': 'painelPedidosFisicos',
-            'usuarios': 'painelUsuarios',
-            'comentarios': 'painelComentarios',
-            'configuracoes': 'painelConfiguracoes'
-        };
-        return mapeamento[painel] || `painel${this.capitalizar(painel)}`;
-    }
-    
+
     carregarDadosPainel(painel) {
-        console.log('Carregando dados para painel:', painel);
-        
         switch (painel) {
             case 'dashboard':
                 this.carregarDadosDashboard();
@@ -492,62 +398,34 @@ class SistemaAdministrativo {
             case 'emprestimos':
                 this.carregarPainelEmprestimos();
                 break;
-            case 'pedidos-fisicos':
-                this.carregarPainelPedidosFisicos();
-                break;
             case 'usuarios':
                 this.carregarPainelUsuarios();
                 break;
             case 'comentarios':
                 this.carregarPainelComentarios();
                 break;
-            case 'configuracoes':
-                this.carregarPainelConfiguracoes();
-                break;
-            default:
-                console.log('Painel sem carregamento específico:', painel);
         }
     }
 
-    capitalizar(texto) {
-        return texto.charAt(0).toUpperCase() + texto.slice(1);
-    }
-
-    // ========== DASHBOARD ==========
+    // ===== DASHBOARD =====
     carregarDadosDashboard() {
         const container = document.getElementById('conteudoDashboard');
         if (!container) return;
 
-        // Simular carregamento
-        container.innerHTML = '<div class="carregando"></div>';
-
         setTimeout(() => {
-            // Coletar dados
             const totalLivros = sistemaLivros.getTotalLivros();
             const livrosDisponiveis = sistemaLivros.getLivrosDisponiveis();
-            const livrosFisicos = sistemaLivros.getLivrosFisicosDisponiveis();
-            const livrosDestaque = sistemaLivros.getLivrosEmDestaque();
-            
             const usuarios = sistemaAuth.getTodosUsuarios();
-            const totalUsuarios = usuarios.length;
             const usuariosAtivos = usuarios.filter(u => u.ativo).length;
-
             const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
             const emprestimosAtivos = emprestimos.filter(e => e.status === 'ativo').length;
             const emprestimosAtrasados = emprestimos.filter(e => 
                 e.status === 'ativo' && new Date(e.dataDevolucaoPrevista) < new Date()
             ).length;
 
-            const pedidosFisicos = ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos') || [];
-            const pedidosPendentes = pedidosFisicos.filter(p => p.status === 'pendente').length;
-
-            const comentarios = sistemaComentarios.getComentariosPendentes();
-            const comentariosPendentes = comentarios.length;
-
-            // Gerar HTML do dashboard
             container.innerHTML = `
-                <div class="dashboard-admin">
-                    <div class="card-dashboard estatistica">
+                <div class="dashboard-compacto">
+                    <div class="card-dashboard">
                         <div class="card-dashboard-header">
                             <h4 class="card-dashboard-titulo">Total de Livros</h4>
                             <div class="card-dashboard-icon">
@@ -556,12 +434,12 @@ class SistemaAdministrativo {
                         </div>
                         <div class="card-dashboard-valor">${totalLivros}</div>
                         <div class="card-dashboard-variacao positivo">
-                            <i class="fas fa-arrow-up"></i>
-                            ${livrosDestaque} em destaque
+                            <i class="fas fa-check"></i>
+                            ${livrosDisponiveis} disponíveis
                         </div>
                     </div>
 
-                    <div class="card-dashboard usuarios">
+                    <div class="card-dashboard">
                         <div class="card-dashboard-header">
                             <h4 class="card-dashboard-titulo">Usuários Ativos</h4>
                             <div class="card-dashboard-icon">
@@ -571,13 +449,13 @@ class SistemaAdministrativo {
                         <div class="card-dashboard-valor">${usuariosAtivos}</div>
                         <div class="card-dashboard-variacao">
                             <i class="fas fa-user"></i>
-                            Total: ${totalUsuarios}
+                            Total: ${usuarios.length}
                         </div>
                     </div>
 
-                    <div class="card-dashboard alertas">
+                    <div class="card-dashboard">
                         <div class="card-dashboard-header">
-                            <h4 class="card-dashboard-titulo">Empréstimos Ativos</h4>
+                            <h4 class="card-dashboard-titulo">Empréstimos</h4>
                             <div class="card-dashboard-icon">
                                 <i class="fas fa-hand-holding"></i>
                             </div>
@@ -588,204 +466,94 @@ class SistemaAdministrativo {
                             ${emprestimosAtrasados} atrasados
                         </div>
                     </div>
+                </div>
 
-                    <div class="card-dashboard livros">
-                        <div class="card-dashboard-header">
-                            <h4 class="card-dashboard-titulo">Livros Físicos</h4>
-                            <div class="card-dashboard-icon">
-                                <i class="fas fa-book-open"></i>
-                            </div>
-                        </div>
-                        <div class="card-dashboard-valor">${livrosFisicos}</div>
-                        <div class="card-dashboard-variacao">
-                            <i class="fas fa-shipping-fast"></i>
-                            ${pedidosPendentes} pedidos
+                <div class="graficos-compactos">
+                    <div class="grafico-card">
+                        <h4>Livros por Gênero</h4>
+                        <div class="grafico-barras-compacto">
+                            ${this.gerarGraficoGenerosCompacto()}
                         </div>
                     </div>
                 </div>
 
-                <div class="secao-admin">
-                    <div class="secao-admin-header">
-                        <h3><i class="fas fa-chart-pie"></i> Estatísticas por Gênero</h3>
-                    </div>
-                    <div class="secao-admin-corpo">
-                        <div class="grafico-barras-container" id="graficoGeneros">
-                            ${this.gerarGraficoGeneros()}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="secao-admin">
-                    <div class="secao-admin-header">
-                        <h3><i class="fas fa-bell"></i> Alertas do Sistema</h3>
-                    </div>
-                    <div class="secao-admin-corpo">
-                        <div class="lista-alertas" id="listaAlertas">
-                            ${this.gerarAlertasSistema(
-                                emprestimosAtrasados, 
-                                comentariosPendentes, 
-                                pedidosPendentes,
-                                livrosDisponiveis
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="secao-admin">
-                    <div class="secao-admin-header">
-                        <h3><i class="fas fa-clock"></i> Atividade Recente</h3>
-                    </div>
-                    <div class="secao-admin-corpo">
-                        <div class="atividade-recente">
-                            ${this.gerarAtividadeRecente(emprestimos)}
-                        </div>
+                <div class="alertas-compactos">
+                    <h4>Alertas do Sistema</h4>
+                    <div class="lista-alertas-compacta">
+                        ${this.gerarAlertasSistemaCompacto(emprestimosAtrasados)}
                     </div>
                 </div>
             `;
-        }, 1000);
+        }, 500);
     }
 
-    gerarGraficoGeneros() {
+    gerarGraficoGenerosCompacto() {
         const livrosPorGenero = sistemaLivros.getLivrosPorGenero();
         const generos = Object.keys(livrosPorGenero);
-        const totalLivros = sistemaLivros.getTotalLivros();
+        const maxQuantidade = Math.max(...Object.values(livrosPorGenero));
 
-        if (generos.length === 0) {
-            return '<p class="sem-dados">Nenhum dado disponível para gerar gráfico.</p>';
-        }
-
-        let html = '';
-        generos.forEach(genero => {
+        return generos.map(genero => {
             const quantidade = livrosPorGenero[genero];
-            const porcentagem = ((quantidade / totalLivros) * 100).toFixed(1);
-            const nomeGenero = sistemaLivros.obterNomeGenero(genero);
+            const altura = maxQuantidade > 0 ? (quantidade / maxQuantidade) * 80 : 0;
+            const nomeAbreviado = sistemaLivros.obterNomeGenero(genero).substring(0, 3);
             
-            html += `
-                <div class="barra-genero">
-                    <div class="barra-rotulo">${nomeGenero}</div>
-                    <div class="barra-container">
-                        <div class="barra" style="width: ${porcentagem}%; background-color: ${this.obterCorGenero(generos.indexOf(genero))};"></div>
-                        <div class="barra-valor">${quantidade} (${porcentagem}%)</div>
-                    </div>
+            return `
+                <div class="barra-genero-compacta">
+                    <div class="barra" style="height: ${altura}px; background-color: ${this.obterCorGenero(generos.indexOf(genero))};"></div>
+                    <div class="barra-valor-compacta">${nomeAbreviado}</div>
+                    <div class="barra-valor-compacta">${quantidade}</div>
                 </div>
             `;
-        });
-
-        return html;
+        }).join('');
     }
 
-    obterCorGenero(index) {
-        const cores = [
-            '#8B0000', '#A52A2A', '#D4AF37', '#B8860B',
-            '#28a745', '#007bff', '#6f42c1', '#fd7e14',
-            '#20c997', '#e83e8c'
-        ];
-        return cores[index % cores.length];
-    }
-
-    gerarAlertasSistema(emprestimosAtrasados, comentariosPendentes, pedidosPendentes, livrosDisponiveis) {
+    gerarAlertasSistemaCompacto(emprestimosAtrasados) {
         const alertas = [];
 
         if (emprestimosAtrasados > 0) {
-            alertas.push({
-                tipo: 'critico',
-                mensagem: `${emprestimosAtrasados} empréstimo(s) em atraso`,
-                icone: 'fa-clock'
-            });
+            alertas.push(`
+                <div class="alerta-item-compacto critico">
+                    <i class="fas fa-clock"></i>
+                    <span>${emprestimosAtrasados} empréstimo(s) em atraso</span>
+                </div>
+            `);
         }
 
+        const comentariosPendentes = sistemaComentarios.getComentariosPendentes().length;
         if (comentariosPendentes > 0) {
-            alertas.push({
-                tipo: 'aviso',
-                mensagem: `${comentariosPendentes} comentário(s) aguardando moderação`,
-                icone: 'fa-comments'
-            });
-        }
-
-        if (pedidosPendentes > 0) {
-            alertas.push({
-                tipo: 'info',
-                mensagem: `${pedidosPendentes} pedido(s) de livro físico pendentes`,
-                icone: 'fa-shipping-fast'
-            });
-        }
-
-        if (livrosDisponiveis === 0) {
-            alertas.push({
-                tipo: 'critico',
-                mensagem: 'Nenhum livro disponível para empréstimo',
-                icone: 'fa-exclamation-triangle'
-            });
+            alertas.push(`
+                <div class="alerta-item-compacto aviso">
+                    <i class="fas fa-comments"></i>
+                    <span>${comentariosPendentes} comentário(s) pendentes</span>
+                </div>
+            `);
         }
 
         if (alertas.length === 0) {
             return `
-                <div class="alerta-item info">
+                <div class="alerta-item-compacto">
                     <i class="fas fa-check-circle"></i>
                     <span>Sistema funcionando normalmente</span>
                 </div>
             `;
         }
 
-        return alertas.map(alerta => `
-            <div class="alerta-item ${alerta.tipo}">
-                <i class="fas ${alerta.icone}"></i>
-                <span>${alerta.mensagem}</span>
-            </div>
-        `).join('');
+        return alertas.join('');
     }
 
-    gerarAtividadeRecente(emprestimos) {
-        // Ordenar por data mais recente
-        const atividadesRecentes = emprestimos
-            .sort((a, b) => new Date(b.dataEmprestimo) - new Date(a.dataEmprestimo))
-            .slice(0, 5);
-
-        if (atividadesRecentes.length === 0) {
-            return '<p class="sem-dados">Nenhuma atividade recente.</p>';
-        }
-
-        return atividadesRecentes.map(emp => `
-            <div class="atividade-item">
-                <div class="atividade-icon">
-                    <i class="fas fa-hand-holding"></i>
-                </div>
-                <div class="atividade-conteudo">
-                    <div class="atividade-descricao">
-                        <strong>${emp.usuarioNome}</strong> emprestou <strong>${emp.livroTitulo}</strong>
-                    </div>
-                    <div class="atividade-data">
-                        ${UtilitariosData.formatarData(emp.dataEmprestimo)}
-                    </div>
-                </div>
-                <div class="atividade-status ${emp.status === 'ativo' ? 'ativo' : 'finalizado'}">
-                    ${emp.status === 'ativo' ? 'Ativo' : 'Finalizado'}
-                </div>
-            </div>
-        `).join('');
-    }
-
-    atualizarDashboard() {
-        this.carregarDadosDashboard();
-        mensagens.sucesso('Dashboard atualizado com sucesso!');
-    }
-
-    // ========== GERENCIAR LIVROS ==========
+    // ===== LIVROS =====
     carregarTabelaLivros() {
         const tbody = document.getElementById('tabelaLivrosBody');
         if (!tbody) return;
 
-        const livros = sistemaLivros.livros;
+        const livros = sistemaLivros.livros.slice(0, 10); // Mostrar apenas 10 livros
 
         if (livros.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="8" class="sem-dados">
+                    <td colspan="5" class="sem-dados-compacto">
                         <i class="fas fa-book"></i>
                         <p>Nenhum livro cadastrado</p>
-                        <button class="botao botao-primario" onclick="sistemaAdmin.abrirPainelAdmin('adicionar-livro')">
-                            Adicionar Primeiro Livro
-                        </button>
                     </td>
                 </tr>
             `;
@@ -795,51 +563,29 @@ class SistemaAdministrativo {
         tbody.innerHTML = livros.map(livro => `
             <tr>
                 <td>
-                    <div class="livro-info">
+                    <div class="livro-info-compacto">
                         <img src="${livro.imagem}" alt="${livro.titulo}" 
                              onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=100'">
                         <div>
-                            <strong>${Formatadores.limitarTexto(livro.titulo, 40)}</strong>
-                            <div class="livro-isbn">${livro.isbn}</div>
+                            <strong>${Formatadores.limitarTexto(livro.titulo, 25)}</strong>
                         </div>
                     </div>
                 </td>
-                <td>${livro.autor}</td>
+                <td>${Formatadores.limitarTexto(livro.autor, 20)}</td>
                 <td>
-                    <span class="badge genero">${sistemaLivros.obterNomeGenero(livro.genero)}</span>
+                    <span class="badge-compacto genero">${sistemaLivros.obterNomeGenero(livro.genero)}</span>
                 </td>
-                <td>${livro.ano}</td>
                 <td>
-                    <span class="estoque ${livro.estoque > 0 ? 'disponivel' : 'indisponivel'}">
+                    <span class="estoque-compacto ${livro.estoque > 0 ? 'disponivel' : 'indisponivel'}">
                         ${livro.estoque}
                     </span>
                 </td>
                 <td>
-                    <span class="status-livro ${livro.disponivel ? 'status-disponivel' : 'status-indisponivel'}">
-                        <i class="fas ${livro.disponivel ? 'fa-check-circle' : 'fa-times-circle'}"></i>
-                        ${livro.disponivel ? 'Disponível' : 'Indisponível'}
-                    </span>
-                </td>
-                <td>
-                    ${livro.fisicoDisponivel ? 
-                        '<span class="badge-sucesso"><i class="fas fa-check"></i> Sim</span>' : 
-                        '<span class="badge-erro"><i class="fas fa-times"></i> Não</span>'
-                    }
-                </td>
-                <td>
-                    <div class="acoes-tabela">
-                        <button class="botao-acao botao-visualizar" onclick="sistemaAdmin.visualizarLivroAdmin('${livro.id}')" title="Visualizar">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="botao-acao botao-editar" onclick="sistemaAdmin.editarLivro('${livro.id}')" title="Editar">
+                    <div class="acoes-tabela-compacta">
+                        <button class="botao-acao-compacto botao-editar-compacto" onclick="sistemaAdmin.editarLivro('${livro.id}')" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
-                        ${livro.estoque === 0 ? `
-                            <button class="botao-acao botao-sucesso" onclick="sistemaAdmin.reporEstoque('${livro.id}')" title="Repor Estoque">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        ` : ''}
-                        <button class="botao-acao botao-excluir" onclick="sistemaAdmin.excluirLivro('${livro.id}')" title="Excluir">
+                        <button class="botao-acao-compacto botao-excluir-compacto" onclick="sistemaAdmin.excluirLivro('${livro.id}')" title="Excluir">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -848,604 +594,57 @@ class SistemaAdministrativo {
         `).join('');
     }
 
-    visualizarLivroAdmin(livroId) {
-        sistemaLivros.abrirDetalhesLivro(livroId);
-    }
-
-    editarLivro(livroId) {
-        const livro = sistemaLivros.livros.find(l => l.id === livroId);
-        if (!livro) {
-            mensagens.erro('Livro não encontrado.');
-            return;
-        }
-
-        // Preencher formulário com dados do livro
-        document.getElementById('tituloLivro').value = livro.titulo;
-        document.getElementById('autorLivro').value = livro.autor;
-        document.getElementById('generoLivro').value = livro.genero;
-        document.getElementById('anoLivro').value = livro.ano;
-        document.getElementById('editoraLivro').value = livro.editora;
-        document.getElementById('paginasLivro').value = livro.paginas || '';
-        document.getElementById('sinopseLivro').value = livro.sinopse || livro.descricao;
-        document.getElementById('descricaoLivro').value = livro.descricao || '';
-        document.getElementById('imagemLivro').value = livro.imagem;
-        document.getElementById('estoqueLivro').value = livro.estoque;
-        document.getElementById('classificacaoEtaria').value = livro.classificacaoEtaria || 'L';
-        document.getElementById('isbnLivro').value = livro.isbn || '';
-        document.getElementById('valorEmprestimo').value = livro.valorEmprestimo || 0;
-        document.getElementById('taxaJuros').value = livro.taxaJuros || 0.5;
-        document.getElementById('prazoEmprestimo').value = livro.prazoEmprestimo || 14;
-        document.getElementById('localizacaoFisica').value = livro.localizacaoFisica || '';
-        document.getElementById('destaqueLivro').checked = livro.destaque || false;
-        document.getElementById('fisicoDisponivel').checked = livro.fisicoDisponivel || false;
-        document.getElementById('tagsLivro').value = livro.tags ? livro.tags.join(', ') : '';
-
-        // Alterar comportamento do formulário para edição
-        const form = document.getElementById('formAdicionarLivro');
-        const botaoSubmit = form.querySelector('button[type="submit"]');
-        
-        // Salvar ID do livro sendo editado
-        form.dataset.editando = livroId;
-        botaoSubmit.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
-
-        // Ir para o painel de adicionar livro
-        this.abrirPainelAdmin('adicionar-livro');
-        
-        mensagens.info(`Editando livro: "${livro.titulo}"`);
-    }
-
-    reporEstoque(livroId) {
-        const livro = sistemaLivros.livros.find(l => l.id === livroId);
-        if (!livro) return;
-
-        const novaQuantidade = prompt(`Repor estoque para "${livro.titulo}":`, 1);
-        if (novaQuantidade && !isNaN(novaQuantidade) && parseInt(novaQuantidade) > 0) {
-            livro.estoque = parseInt(novaQuantidade);
-            livro.disponivel = true;
-            ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
-            
-            mensagens.sucesso(`Estoque de "${livro.titulo}" reposto para ${novaQuantidade} unidades.`);
-            this.carregarTabelaLivros();
-        }
-    }
-
-    excluirLivro(livroId) {
-        if (!confirm('Tem certeza que deseja excluir este livro? Esta ação não pode ser desfeita.')) {
-            return;
-        }
-
-        const livroIndex = sistemaLivros.livros.findIndex(l => l.id === livroId);
-        if (livroIndex === -1) {
-            mensagens.erro('Livro não encontrado.');
-            return;
-        }
-
-        const livro = sistemaLivros.livros[livroIndex];
-        
-        // Verificar se há empréstimos ativos para este livro
-        const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
-        const emprestimosAtivos = emprestimos.filter(e => e.livroId === livroId && e.status === 'ativo');
-        
-        if (emprestimosAtivos.length > 0) {
-            mensagens.erro('Não é possível excluir este livro pois existem empréstimos ativos.');
-            return;
-        }
-
-        // Remover livro
-        sistemaLivros.livros.splice(livroIndex, 1);
-        ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
-
-        // Remover comentários do livro
-        sistemaComentarios.comentarios = sistemaComentarios.comentarios.filter(c => c.livroId !== livroId);
-        ArmazenamentoLocal.salvar('biblioteca_comentarios', sistemaComentarios.comentarios);
-
-        // Remover de favoritos
-        const favoritos = ArmazenamentoLocal.carregar('biblioteca_favoritos') || [];
-        const favoritosAtualizados = favoritos.filter(f => f.livroId !== livroId);
-        ArmazenamentoLocal.salvar('biblioteca_favoritos', favoritosAtualizados);
-
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Livro Excluído',
-            `"${livro.titulo}" foi removido do catálogo`,
-            'aviso'
-        );
-
-        mensagens.sucesso(`Livro "${livro.titulo}" excluído com sucesso!`);
-        this.carregarTabelaLivros();
-        sistemaLivros.carregarDestaques();
-        sistemaLivros.aplicarFiltros();
-    }
-
-    // ========== ADICIONAR/EDITAR LIVRO ==========
-    adicionarLivro() {
-        const form = document.getElementById('formAdicionarLivro');
-        const estaEditando = form.dataset.editando;
-        
-        if (estaEditando) {
-            this.salvarEdicaoLivro(estaEditando);
-            return;
-        }
-
-        // Validar campos obrigatórios
-        const camposObrigatorios = [
-            'tituloLivro', 'autorLivro', 'generoLivro', 'anoLivro', 
-            'editoraLivro', 'sinopseLivro', 'estoqueLivro'
-        ];
-
-        for (let campoId of camposObrigatorios) {
-            const campo = document.getElementById(campoId);
-            if (!campo.value.trim()) {
-                mensagens.erro(`O campo "${campo.previousElementSibling.textContent}" é obrigatório.`);
-                campo.focus();
-                return;
-            }
-        }
-
-        const ano = parseInt(document.getElementById('anoLivro').value);
-        if (ano < 1000 || ano > new Date().getFullYear()) {
-            mensagens.erro('Por favor, insira um ano válido.');
-            document.getElementById('anoLivro').focus();
-            return;
-        }
-
-        const estoque = parseInt(document.getElementById('estoqueLivro').value);
-        if (estoque < 0) {
-            mensagens.erro('O estoque não pode ser negativo.');
-            document.getElementById('estoqueLivro').focus();
-            return;
-        }
-
-        // Coletar dados do formulário
-        const tags = document.getElementById('tagsLivro').value
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag.length > 0);
-
-        const novoLivro = {
-            id: GeradorID.gerar(),
-            titulo: document.getElementById('tituloLivro').value.trim(),
-            autor: document.getElementById('autorLivro').value.trim(),
-            genero: document.getElementById('generoLivro').value,
-            ano: ano,
-            editora: document.getElementById('editoraLivro').value.trim(),
-            paginas: parseInt(document.getElementById('paginasLivro').value) || 0,
-            sinopse: document.getElementById('sinopseLivro').value.trim(),
-            descricao: document.getElementById('descricaoLivro').value.trim() || document.getElementById('sinopseLivro').value.trim(),
-            imagem: document.getElementById('imagemLivro').value.trim() || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400',
-            estoque: estoque,
-            disponivel: estoque > 0,
-            isbn: document.getElementById('isbnLivro').value.trim() || GeradorID.gerarISBN(),
-            valorEmprestimo: parseFloat(document.getElementById('valorEmprestimo').value) || 0,
-            taxaJuros: parseFloat(document.getElementById('taxaJuros').value) || 0.5,
-            prazoEmprestimo: parseInt(document.getElementById('prazoEmprestimo').value) || 14,
-            dataCadastro: new Date().toISOString(),
-            avaliacao: 0,
-            totalAvaliacoes: 0,
-            classificacaoEtaria: document.getElementById('classificacaoEtaria').value || 'L',
-            destaque: document.getElementById('destaqueLivro').checked,
-            fisicoDisponivel: document.getElementById('fisicoDisponivel').checked,
-            localizacaoFisica: document.getElementById('localizacaoFisica').value.trim() || 'Prateleira A-01',
-            tags: tags
-        };
-
-        // Adicionar ao sistema
-        sistemaLivros.livros.push(novoLivro);
-        ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
-
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Novo Livro Adicionado',
-            `"${novoLivro.titulo}" foi adicionado ao catálogo`,
-            'sucesso'
-        );
-
-        mensagens.sucesso(`Livro "${novoLivro.titulo}" adicionado com sucesso!`);
-        
-        // Limpar formulário
-        this.limparFormularioLivro();
-        
-        // Atualizar interfaces
-        sistemaLivros.carregarDestaques();
-        sistemaLivros.aplicarFiltros();
-        
-        // Voltar para o painel de gerenciamento
-        this.abrirPainelAdmin('livros');
-    }
-
-    salvarEdicaoLivro(livroId) {
-        const livroIndex = sistemaLivros.livros.findIndex(l => l.id === livroId);
-        if (livroIndex === -1) {
-            mensagens.erro('Livro não encontrado.');
-            return;
-        }
-
-        // Validar campos (usar mesma validação do adicionarLivro)
-        const camposObrigatorios = [
-            'tituloLivro', 'autorLivro', 'generoLivro', 'anoLivro', 
-            'editoraLivro', 'sinopseLivro', 'estoqueLivro'
-        ];
-
-        for (let campoId of camposObrigatorios) {
-            const campo = document.getElementById(campoId);
-            if (!campo.value.trim()) {
-                mensagens.erro(`O campo "${campo.previousElementSibling.textContent}" é obrigatório.`);
-                campo.focus();
-                return;
-            }
-        }
-
-        const ano = parseInt(document.getElementById('anoLivro').value);
-        if (ano < 1000 || ano > new Date().getFullYear()) {
-            mensagens.erro('Por favor, insira um ano válido.');
-            document.getElementById('anoLivro').focus();
-            return;
-        }
-
-        const estoque = parseInt(document.getElementById('estoqueLivro').value);
-        if (estoque < 0) {
-            mensagens.erro('O estoque não pode ser negativo.');
-            document.getElementById('estoqueLivro').focus();
-            return;
-        }
-
-        // Coletar dados do formulário
-        const tags = document.getElementById('tagsLivro').value
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag.length > 0);
-
-        // Atualizar livro
-        sistemaLivros.livros[livroIndex] = {
-            ...sistemaLivros.livros[livroIndex],
-            titulo: document.getElementById('tituloLivro').value.trim(),
-            autor: document.getElementById('autorLivro').value.trim(),
-            genero: document.getElementById('generoLivro').value,
-            ano: ano,
-            editora: document.getElementById('editoraLivro').value.trim(),
-            paginas: parseInt(document.getElementById('paginasLivro').value) || 0,
-            sinopse: document.getElementById('sinopseLivro').value.trim(),
-            descricao: document.getElementById('descricaoLivro').value.trim() || document.getElementById('sinopseLivro').value.trim(),
-            imagem: document.getElementById('imagemLivro').value.trim() || sistemaLivros.livros[livroIndex].imagem,
-            estoque: estoque,
-            disponivel: estoque > 0,
-            isbn: document.getElementById('isbnLivro').value.trim() || sistemaLivros.livros[livroIndex].isbn,
-            valorEmprestimo: parseFloat(document.getElementById('valorEmprestimo').value) || 0,
-            taxaJuros: parseFloat(document.getElementById('taxaJuros').value) || 0.5,
-            prazoEmprestimo: parseInt(document.getElementById('prazoEmprestimo').value) || 14,
-            classificacaoEtaria: document.getElementById('classificacaoEtaria').value || 'L',
-            destaque: document.getElementById('destaqueLivro').checked,
-            fisicoDisponivel: document.getElementById('fisicoDisponivel').checked,
-            localizacaoFisica: document.getElementById('localizacaoFisica').value.trim() || sistemaLivros.livros[livroIndex].localizacaoFisica,
-            tags: tags
-        };
-
-        ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
-
-        // Restaurar formulário para adição
-        this.limparFormularioLivro();
-        
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Livro Atualizado',
-            `"${sistemaLivros.livros[livroIndex].titulo}" foi atualizado`,
-            'sucesso'
-        );
-
-        mensagens.sucesso(`Livro "${sistemaLivros.livros[livroIndex].titulo}" atualizado com sucesso!`);
-        
-        // Atualizar interfaces
-        this.carregarTabelaLivros();
-        sistemaLivros.carregarDestaques();
-        sistemaLivros.aplicarFiltros();
-        
-        // Voltar para o painel de gerenciamento
-        this.abrirPainelAdmin('livros');
-    }
-
-    limparFormularioLivro() {
-        const form = document.getElementById('formAdicionarLivro');
-        if (form) {
-            form.reset();
-            delete form.dataset.editando;
-            
-            const botaoSubmit = form.querySelector('button[type="submit"]');
-            botaoSubmit.innerHTML = '<i class="fas fa-plus-circle"></i> Adicionar Livro';
-        }
-    }
-
-    // ========== EMPRÉSTIMOS ==========
+    // ===== EMPRÉSTIMOS =====
     carregarPainelEmprestimos() {
         const container = document.getElementById('conteudoEmprestimos');
         if (!container) return;
 
         const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
-        const emprestimosAtivos = emprestimos.filter(e => e.status === 'ativo');
-        const emprestimosFinalizados = emprestimos.filter(e => e.status === 'finalizado');
+        const emprestimosAtivos = emprestimos.filter(e => e.status === 'ativo').slice(0, 5); // Apenas 5
 
-        container.innerHTML = `
-            <div class="estatisticas-emprestimos">
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-hand-holding"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${emprestimosAtivos.length}</span>
-                        <span class="estatistica-rotulo">Empréstimos Ativos</span>
-                    </div>
-                </div>
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${emprestimos.filter(e => this.isEmprestimoAtrasado(e)).length}</span>
-                        <span class="estatistica-rotulo">Em Atraso</span>
-                    </div>
-                </div>
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${emprestimosFinalizados.length}</span>
-                        <span class="estatistica-rotulo">Finalizados</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tabela-container">
-                <h4>Empréstimos Ativos</h4>
-                ${emprestimosAtivos.length > 0 ? `
-                    <table class="tabela-admin">
-                        <thead>
-                            <tr>
-                                <th>Livro</th>
-                                <th>Usuário</th>
-                                <th>Data Empréstimo</th>
-                                <th>Devolução Prevista</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${emprestimosAtivos.map(emp => `
-                                <tr>
-                                    <td>
-                                        <div class="livro-info">
-                                            <img src="${emp.livroImagem}" alt="${emp.livroTitulo}" 
-                                                 onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=100'">
-                                            <div>
-                                                <strong>${emp.livroTitulo}</strong>
-                                                <div>${emp.livroAutor}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>${emp.usuarioNome}</td>
-                                    <td>${UtilitariosData.formatarData(emp.dataEmprestimo)}</td>
-                                    <td>${UtilitariosData.formatarData(emp.dataDevolucaoPrevista)}</td>
-                                    <td>
-                                        <span class="status-livro ${this.isEmprestimoAtrasado(emp) ? 'status-indisponivel' : 'status-disponivel'}">
-                                            ${this.isEmprestimoAtrasado(emp) ? 'Atrasado' : 'No Prazo'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="acoes-tabela">
-                                            <button class="botao-acao botao-editar" onclick="sistemaAdmin.registrarDevolucao('${emp.id}')" title="Registrar Devolução">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                            ${this.isEmprestimoAtrasado(emp) ? `
-                                                <button class="botao-acao botao-aviso" onclick="sistemaAdmin.enviarLembrete('${emp.id}')" title="Enviar Lembrete">
-                                                    <i class="fas fa-bell"></i>
-                                                </button>
-                                            ` : ''}
-                                        </div>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                ` : '<p class="sem-dados">Nenhum empréstimo ativo no momento.</p>'}
-            </div>
-        `;
-    }
-
-    isEmprestimoAtrasado(emprestimo) {
-        if (emprestimo.status !== 'ativo') return false;
-        const hoje = new Date();
-        const dataDevolucao = new Date(emprestimo.dataDevolucaoPrevista);
-        return dataDevolucao < hoje;
-    }
-
-    registrarDevolucao(emprestimoId) {
-        const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
-        const emprestimoIndex = emprestimos.findIndex(e => e.id === emprestimoId);
-        
-        if (emprestimoIndex === -1) {
-            mensagens.erro('Empréstimo não encontrado.');
+        if (emprestimosAtivos.length === 0) {
+            container.innerHTML = '<div class="sem-dados-compacto">Nenhum empréstimo ativo</div>';
             return;
         }
 
-        const emprestimo = emprestimos[emprestimoIndex];
-        
-        // Atualizar livro (aumentar estoque)
-        const livro = sistemaLivros.livros.find(l => l.id === emprestimo.livroId);
-        if (livro) {
-            livro.estoque += 1;
-            if (!livro.disponivel) {
-                livro.disponivel = true;
-            }
-            ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
-        }
-
-        // Marcar empréstimo como finalizado
-        emprestimos[emprestimoIndex].status = 'finalizado';
-        emprestimos[emprestimoIndex].dataDevolucao = new Date().toISOString();
-        
-        ArmazenamentoLocal.salvar('biblioteca_emprestimos', emprestimos);
-
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Devolução Registrada',
-            `"${emprestimo.livroTitulo}" foi devolvido por ${emprestimo.usuarioNome}`,
-            'sucesso'
-        );
-
-        mensagens.sucesso('Devolução registrada com sucesso!');
-        
-        this.carregarPainelEmprestimos();
-        sistemaLivros.carregarDestaques();
-    }
-
-    enviarLembrete(emprestimoId) {
-        const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
-        const emprestimo = emprestimos.find(e => e.id === emprestimoId);
-        
-        if (emprestimo) {
-            // Simular envio de lembrete
-            mensagens.info(`Lembrete enviado para ${emprestimo.usuarioNome} sobre a devolução de "${emprestimo.livroTitulo}"`);
-            
-            // Notificação no sistema
-            sistemaNotificacoes.adicionarNotificacao(
-                'Lembrete Enviado',
-                `Lembrete de devolução enviado para ${emprestimo.usuarioNome}`,
-                'info'
-            );
-        }
-    }
-
-    // ========== PEDIDOS FÍSICOS ==========
-    carregarPainelPedidosFisicos() {
-        const container = document.getElementById('conteudoPedidosFisicos');
-        if (!container) return;
-
-        const pedidos = ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos') || [];
-        const pedidosPendentes = pedidos.filter(p => p.status === 'pendente');
-        const pedidosProcessados = pedidos.filter(p => p.status === 'processando');
-        const pedidosConcluidos = pedidos.filter(p => p.status === 'concluido');
-
         container.innerHTML = `
-            <div class="estatisticas-emprestimos">
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${pedidosPendentes.length}</span>
-                        <span class="estatistica-rotulo">Pendentes</span>
-                    </div>
-                </div>
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${pedidosProcessados.length}</span>
-                        <span class="estatistica-rotulo">Processando</span>
-                    </div>
-                </div>
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${pedidosConcluidos.length}</span>
-                        <span class="estatistica-rotulo">Concluídos</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lista-pedidos">
-                <h4>Pedidos Pendentes</h4>
-                ${pedidosPendentes.length > 0 ? 
-                    pedidosPendentes.map(pedido => this.criarItemPedido(pedido)).join('')
-                    : '<p class="sem-dados">Nenhum pedido pendente.</p>'
-                }
-            </div>
-        `;
-    }
-
-    criarItemPedido(pedido) {
-        const livro = sistemaLivros.livros.find(l => l.id === pedido.livroId);
-        if (!livro) return '';
-
-        return `
-            <div class="pedido-item">
-                <div class="pedido-cabecalho">
-                    <div class="pedido-info">
-                        <h4>${livro.titulo}</h4>
-                        <div class="pedido-detalhes">
-                            <span><strong>Solicitante:</strong> ${pedido.usuarioNome}</span>
-                            <span><strong>Data:</strong> ${UtilitariosData.formatarData(pedido.dataPedido)}</span>
-                            <span><strong>Localização:</strong> ${livro.localizacaoFisica}</span>
+            <div class="lista-compacta">
+                ${emprestimosAtivos.map(emp => `
+                    <div class="item-lista-compacto">
+                        <div class="cabecalho-item-compacto">
+                            <h4 class="titulo-item-compacto">${emp.livroTitulo}</h4>
+                            <span class="status-item-compacto ${this.isEmprestimoAtrasado(emp) ? 'status-pendente-compacto' : 'status-ativo-compacto'}">
+                                ${this.isEmprestimoAtrasado(emp) ? 'Atrasado' : 'No Prazo'}
+                            </span>
+                        </div>
+                        <div class="detalhes-item-compacto">
+                            <span><strong>Usuário:</strong> ${emp.usuarioNome}</span>
+                            <span><strong>Data:</strong> ${UtilitariosData.formatarData(emp.dataEmprestimo)}</span>
+                            <span><strong>Devolução:</strong> ${UtilitariosData.formatarData(emp.dataDevolucaoPrevista)}</span>
+                        </div>
+                        <div class="acoes-item-compacto">
+                            <button class="botao botao-primario botao-pequeno" onclick="sistemaAdmin.registrarDevolucao('${emp.id}')">
+                                <i class="fas fa-undo"></i>
+                                Devolver
+                            </button>
                         </div>
                     </div>
-                    <span class="pedido-status status-pendente">Pendente</span>
-                </div>
-                <div class="pedido-acoes">
-                    <button class="botao botao-primario botao-pequeno" onclick="sistemaAdmin.processarPedido('${pedido.id}')">
-                        <i class="fas fa-cog"></i>
-                        Processar
-                    </button>
-                    <button class="botao botao-secundario botao-pequeno" onclick="sistemaAdmin.cancelarPedido('${pedido.id}')">
-                        <i class="fas fa-times"></i>
-                        Cancelar
-                    </button>
-                </div>
+                `).join('')}
             </div>
         `;
     }
 
-    processarPedido(pedidoId) {
-        const pedidos = ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos') || [];
-        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
-        
-        if (pedidoIndex === -1) return;
-
-        pedidos[pedidoIndex].status = 'processando';
-        pedidos[pedidoIndex].dataProcessamento = new Date().toISOString();
-        
-        ArmazenamentoLocal.salvar('biblioteca_pedidos_fisicos', pedidos);
-
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Pedido Processado',
-            `Pedido físico está sendo processado`,
-            'info'
-        );
-
-        mensagens.sucesso('Pedido marcado como processando!');
-        this.carregarPainelPedidosFisicos();
-    }
-
-    cancelarPedido(pedidoId) {
-        if (!confirm('Tem certeza que deseja cancelar este pedido?')) {
-            return;
-        }
-
-        const pedidos = ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos') || [];
-        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
-        
-        if (pedidoIndex === -1) return;
-
-        pedidos[pedidoIndex].status = 'cancelado';
-        ArmazenamentoLocal.salvar('biblioteca_pedidos_fisicos', pedidos);
-
-        mensagens.info('Pedido cancelado.');
-        this.carregarPainelPedidosFisicos();
-    }
-
-    // ========== USUÁRIOS ==========
+    // ===== USUÁRIOS =====
     carregarPainelUsuarios() {
         const tbody = document.getElementById('tabelaUsuariosBody');
         if (!tbody) return;
 
-        const usuarios = sistemaAuth.getTodosUsuarios();
+        const usuarios = sistemaAuth.getTodosUsuarios().slice(0, 10); // Apenas 10 usuários
 
         if (usuarios.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="sem-dados">
+                    <td colspan="5" class="sem-dados-compacto">
                         <i class="fas fa-users"></i>
                         <p>Nenhum usuário cadastrado</p>
                     </td>
@@ -1459,242 +658,231 @@ class SistemaAdministrativo {
         tbody.innerHTML = usuarios.map(usuario => `
             <tr>
                 <td>
-                    <div class="usuario-info">
-                        <div class="usuario-avatar">
+                    <div class="usuario-info-compacto">
+                        <div class="usuario-avatar-compacto">
                             <i class="fas fa-user"></i>
                         </div>
                         <div>
-                            <strong>${usuario.nome}</strong>
-                            <div class="usuario-email">${usuario.email}</div>
+                            <strong>${Formatadores.limitarTexto(usuario.nome, 20)}</strong>
                         </div>
                     </div>
                 </td>
                 <td>${usuario.usuario}</td>
-                <td>${usuario.email}</td>
                 <td>
-                    <span class="badge ${usuario.tipo === 'admin' ? 'badge-admin' : 'badge-usuario'}">
-                        ${usuario.tipo === 'admin' ? 'Administrador' : 'Usuário'}
+                    <span class="badge-compacto ${usuario.tipo === 'admin' ? 'admin' : 'usuario'}">
+                        ${usuario.tipo === 'admin' ? 'Admin' : 'Usuário'}
                     </span>
                 </td>
-                <td>${UtilitariosData.formatarData(usuario.dataCadastro)}</td>
                 <td>
-                    <span class="status-livro ${usuario.ativo ? 'status-disponivel' : 'status-indisponivel'}">
+                    <span class="estoque-compacto ${usuario.ativo ? 'disponivel' : 'indisponivel'}">
                         ${usuario.ativo ? 'Ativo' : 'Inativo'}
                     </span>
                 </td>
                 <td>
-                    <div class="acoes-tabela">
-                        <button class="botao-acao botao-editar" onclick="sistemaAdmin.editarUsuario('${usuario.id}')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
+                    <div class="acoes-tabela-compacta">
                         ${usuario.id !== usuarioLogado?.id ? `
-                            <button class="botao-acao ${usuario.ativo ? 'botao-excluir' : 'botao-sucesso'}" 
+                            <button class="botao-acao-compacto ${usuario.ativo ? 'botao-excluir-compacto' : 'botao-editar-compacto'}" 
                                     onclick="sistemaAdmin.${usuario.ativo ? 'desativarUsuario' : 'ativarUsuario'}('${usuario.id}')"
                                     title="${usuario.ativo ? 'Desativar' : 'Ativar'}">
                                 <i class="fas ${usuario.ativo ? 'fa-user-slash' : 'fa-user-check'}"></i>
                             </button>
-                        ` : '<span class="acao-vazia"></span>'}
+                        ` : ''}
                     </div>
                 </td>
             </tr>
         `).join('');
     }
 
-    editarUsuario(usuarioId) {
-        const usuario = sistemaAuth.usuarios.find(u => u.id === usuarioId);
-        if (!usuario) {
-            mensagens.erro('Usuário não encontrado.');
+    // ===== COMENTÁRIOS =====
+    carregarPainelComentarios() {
+        const container = document.getElementById('conteudoComentarios');
+        if (!container) return;
+
+        const comentariosPendentes = sistemaComentarios.getComentariosPendentes().slice(0, 5); // Apenas 5
+
+        if (comentariosPendentes.length === 0) {
+            container.innerHTML = '<div class="sem-dados-compacto">Nenhum comentário pendente</div>';
             return;
         }
 
-        const novoTipo = usuario.tipo === 'admin' ? 'usuario' : 'admin';
-        const novoTipoTexto = novoTipo === 'admin' ? 'Administrador' : 'Usuário Normal';
+        container.innerHTML = `
+            <div class="lista-compacta">
+                ${comentariosPendentes.map(comentario => {
+                    const livro = sistemaLivros.livros.find(l => l.id === comentario.livroId);
+                    const livroTitulo = livro ? livro.titulo : 'Livro não encontrado';
+                    
+                    return `
+                        <div class="item-lista-compacto">
+                            <div class="cabecalho-item-compacto">
+                                <h4 class="titulo-item-compacto">${Formatadores.limitarTexto(livroTitulo, 30)}</h4>
+                                <span class="status-item-compacto status-pendente-compacto">Pendente</span>
+                            </div>
+                            <div class="detalhes-item-compacto">
+                                <span><strong>Usuário:</strong> ${comentario.usuarioNome}</span>
+                                <span><strong>Avaliação:</strong> ${sistemaLivros.gerarEstrelas(comentario.avaliacao)}</span>
+                            </div>
+                            <div class="detalhes-item-compacto">
+                                <span colspan="2"><strong>Comentário:</strong> ${Formatadores.limitarTexto(comentario.comentario, 50)}</span>
+                            </div>
+                            <div class="acoes-item-compacto">
+                                <button class="botao botao-primario botao-pequeno" onclick="sistemaAdmin.aprovarComentario('${comentario.id}')">
+                                    <i class="fas fa-check"></i>
+                                    Aprovar
+                                </button>
+                                <button class="botao botao-secundario botao-pequeno" onclick="sistemaAdmin.rejeitarComentario('${comentario.id}')">
+                                    <i class="fas fa-times"></i>
+                                    Rejeitar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
 
-        if (confirm(`Deseja alterar o tipo de ${usuario.nome} para ${novoTipoTexto}?`)) {
-            usuario.tipo = novoTipo;
-            ArmazenamentoLocal.salvar('biblioteca_usuarios', sistemaAuth.usuarios);
+    // ===== FUNÇÕES AUXILIARES =====
+    capitalizar(texto) {
+        return texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+
+    obterCorGenero(index) {
+        const cores = ['#8B0000', '#A52A2A', '#D4AF37', '#B8860B', '#28a745', '#007bff'];
+        return cores[index % cores.length];
+    }
+
+    isEmprestimoAtrasado(emprestimo) {
+        if (emprestimo.status !== 'ativo') return false;
+        const hoje = new Date();
+        const dataDevolucao = new Date(emprestimo.dataDevolucaoPrevista);
+        return dataDevolucao < hoje;
+    }
+
+    // ===== FUNÇÕES DE AÇÃO =====
+    adicionarLivro() {
+        const titulo = document.getElementById('tituloLivro').value.trim();
+        const autor = document.getElementById('autorLivro').value.trim();
+        const genero = document.getElementById('generoLivro').value;
+        const ano = parseInt(document.getElementById('anoLivro').value);
+        const estoque = parseInt(document.getElementById('estoqueLivro').value);
+        const sinopse = document.getElementById('sinopseLivro').value.trim();
+        const imagem = document.getElementById('imagemLivro').value.trim();
+
+        if (!titulo || !autor || !genero || !ano || !sinopse) {
+            mensagens.erro('Preencha todos os campos obrigatórios.');
+            return;
+        }
+
+        const novoLivro = {
+            id: GeradorID.gerar(),
+            titulo: titulo,
+            autor: autor,
+            genero: genero,
+            ano: ano,
+            estoque: estoque,
+            disponivel: estoque > 0,
+            sinopse: sinopse,
+            descricao: sinopse,
+            imagem: imagem || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400',
+            dataCadastro: new Date().toISOString(),
+            avaliacao: 0,
+            totalAvaliacoes: 0
+        };
+
+        sistemaLivros.livros.push(novoLivro);
+        ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
+
+        mensagens.sucesso(`Livro "${titulo}" adicionado com sucesso!`);
+        this.limparFormularioLivro();
+        this.abrirPainelAdmin('livros');
+    }
+
+    limparFormularioLivro() {
+        const form = document.getElementById('formAdicionarLivro');
+        if (form) {
+            form.reset();
+        }
+    }
+
+    editarLivro(livroId) {
+        // Implementação simplificada - abrir no painel de adição com dados preenchidos
+        const livro = sistemaLivros.livros.find(l => l.id === livroId);
+        if (livro) {
+            document.getElementById('tituloLivro').value = livro.titulo;
+            document.getElementById('autorLivro').value = livro.autor;
+            document.getElementById('generoLivro').value = livro.genero;
+            document.getElementById('anoLivro').value = livro.ano;
+            document.getElementById('estoqueLivro').value = livro.estoque;
+            document.getElementById('sinopseLivro').value = livro.sinopse;
+            document.getElementById('imagemLivro').value = livro.imagem;
             
-            mensagens.sucesso(`Tipo de usuário alterado para ${novoTipoTexto}`);
-            this.carregarPainelUsuarios();
+            this.abrirPainelAdmin('adicionar-livro');
+            mensagens.info(`Editando: ${livro.titulo}`);
+        }
+    }
+
+    excluirLivro(livroId) {
+        if (!confirm('Tem certeza que deseja excluir este livro?')) return;
+
+        const livroIndex = sistemaLivros.livros.findIndex(l => l.id === livroId);
+        if (livroIndex !== -1) {
+            const livro = sistemaLivros.livros[livroIndex];
+            sistemaLivros.livros.splice(livroIndex, 1);
+            ArmazenamentoLocal.salvar('biblioteca_livros', sistemaLivros.livros);
+            
+            mensagens.sucesso(`Livro "${livro.titulo}" excluído!`);
+            this.carregarTabelaLivros();
+        }
+    }
+
+    registrarDevolucao(emprestimoId) {
+        const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
+        const emprestimoIndex = emprestimos.findIndex(e => e.id === emprestimoId);
+        
+        if (emprestimoIndex !== -1) {
+            emprestimos[emprestimoIndex].status = 'finalizado';
+            emprestimos[emprestimoIndex].dataDevolucao = new Date().toISOString();
+            ArmazenamentoLocal.salvar('biblioteca_emprestimos', emprestimos);
+            
+            mensagens.sucesso('Devolução registrada!');
+            this.carregarPainelEmprestimos();
         }
     }
 
     desativarUsuario(usuarioId) {
         if (sistemaAuth.desativarUsuario(usuarioId)) {
-            mensagens.sucesso('Usuário desativado com sucesso!');
+            mensagens.sucesso('Usuário desativado!');
             this.carregarPainelUsuarios();
-        } else {
-            mensagens.erro('Erro ao desativar usuário.');
         }
     }
 
     ativarUsuario(usuarioId) {
         if (sistemaAuth.ativarUsuario(usuarioId)) {
-            mensagens.sucesso('Usuário ativado com sucesso!');
+            mensagens.sucesso('Usuário ativado!');
             this.carregarPainelUsuarios();
-        } else {
-            mensagens.erro('Erro ao ativar usuário.');
         }
-    }
-
-    // ========== COMENTÁRIOS ==========
-    carregarPainelComentarios() {
-        const container = document.getElementById('conteudoComentarios');
-        if (!container) return;
-
-        const comentariosPendentes = sistemaComentarios.getComentariosPendentes();
-
-        container.innerHTML = `
-            <div class="estatisticas-emprestimos">
-                <div class="estatistica-card">
-                    <div class="estatistica-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <div class="estatistica-info">
-                        <span class="estatistica-valor">${comentariosPendentes.length}</span>
-                        <span class="estatistica-rotulo">Comentários Pendentes</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lista-comentarios-admin">
-                ${comentariosPendentes.length > 0 ? 
-                    comentariosPendentes.map(comentario => this.criarItemComentarioAdmin(comentario)).join('')
-                    : '<p class="sem-dados">Nenhum comentário pendente de aprovação.</p>'
-                }
-            </div>
-        `;
-    }
-
-    criarItemComentarioAdmin(comentario) {
-        const livro = sistemaLivros.livros.find(l => l.id === comentario.livroId);
-        const livroTitulo = livro ? livro.titulo : 'Livro não encontrado';
-
-        return `
-            <div class="comentario-item comentario-pendente">
-                <div class="comentario-cabecalho">
-                    <div class="comentario-usuario">
-                        <strong>${comentario.usuarioNome}</strong>
-                        <div class="comentario-estrelas">
-                            ${sistemaLivros.gerarEstrelas(comentario.avaliacao)}
-                        </div>
-                        <small>Livro: ${livroTitulo}</small>
-                    </div>
-                    <span class="comentario-data">${UtilitariosData.formatarData(comentario.data)}</span>
-                </div>
-                <div class="comentario-texto">
-                    ${comentario.comentario}
-                </div>
-                <div class="comentario-acoes">
-                    <button class="botao botao-primario botao-pequeno" onclick="sistemaAdmin.aprovarComentario('${comentario.id}')">
-                        <i class="fas fa-check"></i>
-                        Aprovar
-                    </button>
-                    <button class="botao botao-secundario botao-pequeno" onclick="sistemaAdmin.rejeitarComentario('${comentario.id}')">
-                        <i class="fas fa-times"></i>
-                        Rejeitar
-                    </button>
-                </div>
-            </div>
-        `;
     }
 
     aprovarComentario(comentarioId) {
         if (sistemaComentarios.aprovarComentario(comentarioId)) {
-            mensagens.sucesso('Comentário aprovado com sucesso!');
+            mensagens.sucesso('Comentário aprovado!');
             this.carregarPainelComentarios();
-        } else {
-            mensagens.erro('Erro ao aprovar comentário.');
         }
     }
 
     rejeitarComentario(comentarioId) {
         if (sistemaComentarios.rejeitarComentario(comentarioId)) {
-            mensagens.info('Comentário rejeitado.');
+            mensagens.info('Comentário rejeitado!');
             this.carregarPainelComentarios();
-        } else {
-            mensagens.erro('Erro ao rejeitar comentário.');
         }
     }
 
-    // ========== CONFIGURAÇÕES ==========
-    carregarPainelConfiguracoes() {
-        const container = document.getElementById('conteudoConfiguracoes');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="configuracoes-grid">
-                <div class="configuracao-card">
-                    <h4><i class="fas fa-palette"></i> Aparência</h4>
-                    <div class="configuracao-opcoes">
-                        <button class="botao ${sistemaTema.temaAtual === 'claro' ? 'botao-primario' : 'botao-secundario'}" 
-                                onclick="sistemaTema.alternarTema()">
-                            <i class="fas ${sistemaTema.temaAtual === 'claro' ? 'fa-moon' : 'fa-sun'}"></i>
-                            Tema ${sistemaTema.temaAtual === 'claro' ? 'Escuro' : 'Claro'}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="configuracao-card">
-                    <h4><i class="fas fa-database"></i> Dados</h4>
-                    <div class="configuracao-opcoes">
-                        <button class="botao botao-primario" onclick="sistemaAdmin.fazerBackup()">
-                            <i class="fas fa-download"></i>
-                            Fazer Backup
-                        </button>
-                        <button class="botao botao-restaurar" onclick="sistemaAdmin.restaurarBackup()">
-                            <i class="fas fa-upload"></i>
-                            Restaurar Backup
-                        </button>
-                        <button class="botao botao-secundario" onclick="sistemaAdmin.limparDados()">
-                            <i class="fas fa-trash"></i>
-                            Limpar Dados
-                        </button>
-                    </div>
-                </div>
-
-                <div class="configuracao-card">
-                    <h4><i class="fas fa-book"></i> Catálogo</h4>
-                    <div class="configuracao-opcoes">
-                        <button class="botao botao-primario" onclick="sistemaLivros.carregarMaisLivrosExemplo()">
-                            <i class="fas fa-plus"></i>
-                            Adicionar Livros de Exemplo
-                        </button>
-                        <button class="botao botao-secundario" onclick="sistemaAdmin.exportarCatalogo()">
-                            <i class="fas fa-file-csv"></i>
-                            Exportar Catálogo
-                        </button>
-                    </div>
-                </div>
-
-                <div class="configuracao-card">
-                    <h4><i class="fas fa-bell"></i> Notificações</h4>
-                    <div class="configuracao-opcoes">
-                        <button class="botao botao-primario" onclick="sistemaNotificacoes.adicionarNotificacao('Teste', 'Esta é uma notificação de teste do sistema', 'info')">
-                            <i class="fas fa-bell"></i>
-                            Testar Notificação
-                        </button>
-                        <button class="botao botao-secundario" onclick="sistemaNotificacoes.marcarTodasComoLidas()">
-                            <i class="fas fa-check-double"></i>
-                            Marcar Todas como Lidas
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // ========== BACKUP E RELATÓRIOS ==========
+    // ===== FUNÇÕES DO SISTEMA =====
     fazerBackup() {
         const dados = {
             livros: sistemaLivros.livros,
             usuarios: sistemaAuth.usuarios,
-            emprestimos: ArmazenamentoLocal.carregar('biblioteca_emprestimos'),
-            comentarios: sistemaComentarios.comentarios,
-            favoritos: ArmazenamentoLocal.carregar('biblioteca_favoritos'),
-            pedidosFisicos: ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos'),
-            dataBackup: new Date().toISOString(),
-            versaoSistema: '2.0'
+            dataBackup: new Date().toISOString()
         };
 
         const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
@@ -1702,254 +890,76 @@ class SistemaAdministrativo {
         const a = document.createElement('a');
         a.href = url;
         a.download = `backup-biblioteca-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Backup Realizado',
-            'Backup do sistema realizado com sucesso',
-            'sucesso'
-        );
-
-        mensagens.sucesso('Backup realizado com sucesso!');
-    }
-
-    restaurarBackup() {
-        // Criar input para upload de arquivo
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.style.display = 'none';
-        
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const dados = JSON.parse(event.target.result);
-                    
-                    // Validar estrutura do backup
-                    if (!dados.livros || !dados.usuarios) {
-                        mensagens.erro('Arquivo de backup inválido.');
-                        return;
-                    }
-
-                    if (!confirm('ATENÇÃO: Esta ação irá substituir todos os dados atuais. Deseja continuar?')) {
-                        return;
-                    }
-
-                    // Restaurar dados
-                    ArmazenamentoLocal.salvar('biblioteca_livros', dados.livros);
-                    ArmazenamentoLocal.salvar('biblioteca_usuarios', dados.usuarios);
-                    
-                    if (dados.emprestimos) {
-                        ArmazenamentoLocal.salvar('biblioteca_emprestimos', dados.emprestimos);
-                    }
-                    if (dados.comentarios) {
-                        ArmazenamentoLocal.salvar('biblioteca_comentarios', dados.comentarios);
-                    }
-                    if (dados.favoritos) {
-                        ArmazenamentoLocal.salvar('biblioteca_favoritos', dados.favoritos);
-                    }
-                    if (dados.pedidosFisicos) {
-                        ArmazenamentoLocal.salvar('biblioteca_pedidos_fisicos', dados.pedidosFisicos);
-                    }
-
-                    // Atualizar sistemas
-                    sistemaLivros.livros = dados.livros;
-                    sistemaAuth.usuarios = dados.usuarios;
-                    sistemaComentarios.comentarios = dados.comentarios || [];
-                    
-                    // Notificação
-                    sistemaNotificacoes.adicionarNotificacao(
-                        'Backup Restaurado',
-                        'Sistema restaurado do backup com sucesso',
-                        'sucesso'
-                    );
-
-                    mensagens.sucesso('Backup restaurado com sucesso! Recarregando...');
-                    
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-
-                } catch (error) {
-                    mensagens.erro('Erro ao restaurar backup: ' + error.message);
-                }
-            };
-            
-            reader.readAsText(file);
-        };
-
-        document.body.appendChild(input);
-        input.click();
-        document.body.removeChild(input);
+        mensagens.sucesso('Backup realizado!');
     }
 
     limparDados() {
-        if (!confirm('ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema. Esta ação não pode ser desfeita. Tem certeza?')) {
-            return;
-        }
-
-        if (!confirm('CONFIRMAÇÃO FINAL: Você realmente deseja apagar todos os dados da biblioteca?')) {
-            return;
-        }
-
+        if (!confirm('ATENÇÃO: Isso apagará TODOS os dados. Continuar?')) return;
+        
         ArmazenamentoLocal.limpar();
-        
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Dados Limpos',
-            'Todos os dados do sistema foram apagados',
-            'aviso'
-        );
+        mensagens.info('Dados limpos. Recarregando...');
+        setTimeout(() => location.reload(), 2000);
+    }
 
-        mensagens.info('Todos os dados foram apagados. A página será recarregada.');
-        
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
+    exportarCatalogo() {
+        const livros = sistemaLivros.livros;
+        const csv = ['Título,Autor,Gênero,Ano,Estoque'].concat(
+            livros.map(l => `"${l.titulo}","${l.autor}","${l.genero}",${l.ano},${l.estoque}`)
+        ).join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `catalogo-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        mensagens.sucesso('Catálogo exportado!');
     }
 
     gerarRelatorio() {
         const livros = sistemaLivros.livros;
         const usuarios = sistemaAuth.getTodosUsuarios();
         const emprestimos = ArmazenamentoLocal.carregar('biblioteca_emprestimos') || [];
-        const pedidosFisicos = ArmazenamentoLocal.carregar('biblioteca_pedidos_fisicos') || [];
 
         const relatorio = {
-            dataGeracao: new Date().toISOString(),
+            data: new Date().toISOString(),
             totalLivros: livros.length,
-            livrosDisponiveis: sistemaLivros.getLivrosDisponiveis(),
-            livrosFisicos: sistemaLivros.getLivrosFisicosDisponiveis(),
             totalUsuarios: usuarios.length,
-            usuariosAtivos: usuarios.filter(u => u.ativo).length,
             totalEmprestimos: emprestimos.length,
-            emprestimosAtivos: emprestimos.filter(e => e.status === 'ativo').length,
-            emprestimosAtrasados: emprestimos.filter(e => this.isEmprestimoAtrasado(e)).length,
-            pedidosPendentes: pedidosFisicos.filter(p => p.status === 'pendente').length,
-            livrosPorGenero: sistemaLivros.getLivrosPorGenero(),
-            livrosMaisEmprestados: this.obterLivrosMaisEmprestados(emprestimos),
-            usuariosMaisAtivos: this.obterUsuariosMaisAtivos(emprestimos, usuarios)
+            livrosPorGenero: sistemaLivros.getLivrosPorGenero()
         };
 
-        // Simular download do relatório
         const blob = new Blob([JSON.stringify(relatorio, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `relatorio-biblioteca-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
+        a.download = `relatorio-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        // Notificação
-        sistemaNotificacoes.adicionarNotificacao(
-            'Relatório Gerado',
-            'Relatório do sistema gerado com sucesso',
-            'sucesso'
-        );
-
-        mensagens.sucesso('Relatório gerado e baixado com sucesso!');
+        mensagens.sucesso('Relatório gerado!');
     }
 
-    obterLivrosMaisEmprestados(emprestimos) {
-        const contagem = {};
-        emprestimos.forEach(emp => {
-            contagem[emp.livroId] = (contagem[emp.livroId] || 0) + 1;
-        });
-
-        return Object.entries(contagem)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .map(([livroId, quantidade]) => {
-                const livro = sistemaLivros.livros.find(l => l.id === livroId);
-                return {
-                    titulo: livro ? livro.titulo : 'Livro não encontrado',
-                    quantidade: quantidade
-                };
-            });
-    }
-
-    obterUsuariosMaisAtivos(emprestimos, usuarios) {
-        const contagem = {};
-        emprestimos.forEach(emp => {
-            contagem[emp.usuarioId] = (contagem[emp.usuarioId] || 0) + 1;
-        });
-
-        return Object.entries(contagem)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .map(([usuarioId, quantidade]) => {
-                const usuario = usuarios.find(u => u.id === usuarioId);
-                return {
-                    nome: usuario ? usuario.nome : 'Usuário não encontrado',
-                    quantidade: quantidade
-                };
-            });
-    }
-
-    exportarCatalogo() {
-        const livros = sistemaLivros.livros;
-        
-        // Converter para CSV
-        const cabecalho = ['Título', 'Autor', 'Gênero', 'Ano', 'Editora', 'ISBN', 'Estoque', 'Disponível', 'Classificação'];
-        const linhas = livros.map(livro => [
-            `"${livro.titulo}"`,
-            `"${livro.autor}"`,
-            `"${sistemaLivros.obterNomeGenero(livro.genero)}"`,
-            livro.ano,
-            `"${livro.editora}"`,
-            `"${livro.isbn}"`,
-            livro.estoque,
-            livro.disponivel ? 'Sim' : 'Não',
-            `"${livro.classificacaoEtaria === 'L' ? 'Livre' : livro.classificacaoEtaria + ' anos'}"`
-        ]);
-
-        const csv = [cabecalho, ...linhas].map(row => row.join(',')).join('\n');
-        
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `catalogo-biblioteca-${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        mensagens.sucesso('Catálogo exportado com sucesso!');
+    atualizarDashboard() {
+        this.carregarDadosDashboard();
+        mensagens.info('Dashboard atualizado!');
     }
 }
 
-// Inicializar sistema administrativo
-const sistemaAdmin = new SistemaAdministrativo();
+// Inicializar o sistema administrativo compacto
+const sistemaAdmin = new SistemaAdministrativoCompacto();
 
-// Funções globais para eventos do HTML
+// Funções globais para o HTML
 function abrirPainelAdmin(painel) {
     sistemaAdmin.abrirPainelAdmin(painel);
 }
 
-function gerarRelatorio() {
-    sistemaAdmin.gerarRelatorio();
+function mostrarAreaAdmin() {
+    sistemaAdmin.carregarInterfaceAdmin();
 }
 
-function fazerBackup() {
-    sistemaAdmin.fazerBackup();
-}
-
-function limparFormularioLivro() {
-    sistemaAdmin.limparFormularioLivro();
-}
-
-function scrollParaAdmin() {
-    document.getElementById('areaAdministrativa').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
-}

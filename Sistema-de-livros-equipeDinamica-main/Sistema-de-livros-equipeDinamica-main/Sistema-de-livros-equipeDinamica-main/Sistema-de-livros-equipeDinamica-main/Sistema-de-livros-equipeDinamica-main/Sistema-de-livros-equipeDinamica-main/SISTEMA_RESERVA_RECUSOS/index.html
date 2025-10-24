@@ -18,15 +18,9 @@
                     <div class="logo-icon">
                         <i class="fas fa-book-open"></i>
                     </div>
-                    <div class="logo-texto">
-                        <h1>Biblioteca Cesf Online</h1>
-                        <p class="slogan">Em parceria com Biblioteca Cesta - Sagrada Família</p>
-                    </div>
+                    <h1>Biblioteca Cesf Online</h1>
                 </div>
-                <div class="badge-parceria">
-                    <i class="fas fa-handshake"></i>
-                    Parceria Ativa
-                </div>
+                <p class="slogan">Descubra milhares de livros e expanda seu conhecimento</p>
             </div>
 
             <div class="opcoes-entrada">
@@ -36,10 +30,7 @@
                     </div>
                     <h3>Criar Conta</h3>
                     <p>Cadastre-se para acessar todos os recursos</p>
-                    <button class="botao botao-primario">
-                        <i class="fas fa-rocket"></i>
-                        Começar
-                    </button>
+                    <button class="botao botao-primario">Começar</button>
                 </div>
 
                 <div class="card-opcao" onclick="mostrarLogin()">
@@ -48,10 +39,7 @@
                     </div>
                     <h3>Fazer Login</h3>
                     <p>Acesse sua conta existente</p>
-                    <button class="botao botao-secundario">
-                        <i class="fas fa-key"></i>
-                        Entrar
-                    </button>
+                    <button class="botao botao-secundario">Entrar</button>
                 </div>
 
                 <div class="card-opcao" onclick="entrarComoConvidado()">
@@ -60,34 +48,28 @@
                     </div>
                     <h3>Convidado</h3>
                     <p>Explore os livros sem cadastro</p>
-                    <button class="botao botao-convidado">
-                        <i class="fas fa-binoculars"></i>
-                        Explorar
-                    </button>
+                    <button class="botao botao-convidado">Explorar</button>
                 </div>
             </div>
 
-            <div class="recursos-inicio">
-                <div class="recurso-item">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h4>Livros Físicos</h4>
-                    <p>Peça livros da Biblioteca Cesta</p>
+            <div class="estatisticas-inicio">
+                <div class="estatistica-item">
+                    <span class="numero">+2.000</span>
+                    <span class="rotulo">Livros</span>
                 </div>
-                <div class="recurso-item">
-                    <i class="fas fa-bolt"></i>
-                    <h4>Rápido</h4>
-                    <p>Empréstimos em poucos cliques</p>
+                <div class="estatistica-item">
+                    <span class="numero">+5.000</span>
+                    <span class="rotulo">Leitores</span>
                 </div>
-                <div class="recurso-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>Seguro</h4>
-                    <p>Seus dados protegidos</p>
+                <div class="estatistica-item">
+                    <span class="numero">+10.000</span>
+                    <span class="rotulo">Empréstimos</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sistema Principal -->
+    <!-- Sistema Principal (oculto inicialmente) -->
     <div id="sistemaPrincipal" style="display: none;">
         <!-- Header -->
         <header>
@@ -99,7 +81,7 @@
                         </div>
                         <div class="logo-texto">
                             <h1>Biblioteca Cesf</h1>
-                            <span class="logo-subtitulo">Parceria Cesta</span>
+                            <span class="logo-subtitulo">Sistema Online</span>
                         </div>
                     </div>
                     
@@ -124,14 +106,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- Botão Admin Fixo -->
-        <div id="botaoAdminFixo" class="botao-admin-fixo" style="display: none;">
-            <button class="botao botao-primario" onclick="scrollParaAdmin()">
-                <i class="fas fa-cogs"></i>
-                Painel Admin
-            </button>
-        </div>
 
         <!-- Barra de Pesquisa -->
         <section class="busca-section">
@@ -173,6 +147,8 @@
                                 <option value="2022">2022</option>
                                 <option value="2021">2021</option>
                                 <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
                             </select>
                         </div>
                         
@@ -205,10 +181,7 @@
         <main class="container">
             <!-- Seção de Destaques -->
             <section class="destaques-section">
-                <h2 class="titulo-secao">
-                    <i class="fas fa-star"></i>
-                    Livros em Destaque
-                </h2>
+                <h2 class="titulo-secao">Livros em Destaque</h2>
                 <div class="carrossel-destaques" id="carrosselDestaques">
                     <!-- Destaques carregados via JavaScript -->
                 </div>
@@ -217,10 +190,7 @@
             <!-- Catálogo de Livros -->
             <section class="catalogo-section">
                 <div class="cabecalho-catalogo">
-                    <h2 class="titulo-secao">
-                        <i class="fas fa-book"></i>
-                        Catálogo Completo
-                    </h2>
+                    <h2 class="titulo-secao">Catálogo Completo</h2>
                     <div class="controles-catalogo">
                         <div class="controle-exibicao">
                             <span>Visualização:</span>
@@ -255,7 +225,339 @@
 
             <!-- Área Administrativa -->
             <section id="areaAdministrativa" class="admin-section" style="display: none;">
-                <!-- Conteúdo do Admin será carregado aqui -->
+                <div class="cabecalho-admin">
+                    <h2 class="titulo-secao">Painel Administrativo</h2>
+                    <div class="controles-admin">
+                        <button class="botao botao-primario" onclick="gerarRelatorio()">
+                            <i class="fas fa-file-export"></i>
+                            Exportar Relatório
+                        </button>
+                        <button class="botao botao-secundario" onclick="fazerBackup()">
+                            <i class="fas fa-download"></i>
+                            Backup
+                        </button>
+                    </div>
+                </div>
+
+                <div class="painel-admin">
+                    <div class="sidebar-admin">
+                        <nav class="menu-admin">
+                            <ul>
+                                <li>
+                                    <a href="#" class="item-menu ativo" data-painel="dashboard" onclick="abrirPainelAdmin('dashboard')">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="livros" onclick="abrirPainelAdmin('livros')">
+                                        <i class="fas fa-book"></i>
+                                        <span>Gerenciar Livros</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="adicionar-livro" onclick="abrirPainelAdmin('adicionar-livro')">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span>Adicionar Livro</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="emprestimos" onclick="abrirPainelAdmin('emprestimos')">
+                                        <i class="fas fa-hand-holding"></i>
+                                        <span>Empréstimos</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="reservas" onclick="abrirPainelAdmin('reservas')">
+                                        <i class="fas fa-bookmark"></i>
+                                        <span>Reservas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="usuarios" onclick="abrirPainelAdmin('usuarios')">
+                                        <i class="fas fa-users"></i>
+                                        <span>Usuários</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="comentarios" onclick="abrirPainelAdmin('comentarios')">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Comentários</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-menu" data-painel="configuracoes" onclick="abrirPainelAdmin('configuracoes')">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Configurações</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <div class="conteudo-admin">
+                        <!-- Painel Dashboard -->
+                        <div id="painelDashboard" class="painel-conteudo ativo">
+                            <!-- Conteúdo do dashboard -->
+                        </div>
+                    
+                        <!-- Painel Gerenciar Livros -->
+                        <div id="painelLivros" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Livros</h3>
+                                <div class="controles-painel">
+                                    <button class="botao botao-primario" onclick="abrirPainelAdmin('adicionar-livro')">
+                                        <i class="fas fa-plus"></i>
+                                        Novo Livro
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tabela-container">
+                                <table class="tabela-dados">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Autor</th>
+                                            <th>Gênero</th>
+                                            <th>Ano</th>
+                                            <th>Estoque</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaLivrosBody">
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    
+                        <!-- Painel Adicionar Livro -->
+                        <div id="painelAdicionarLivro" class="painel-conteudo">
+                            <h3>Adicionar Novo Livro</h3>
+                            <form id="formAdicionarLivro" class="formulario-admin">
+                                <!-- Formulário de adicionar livro -->
+                            </form>
+                        </div>
+                    
+                        <!-- Painel Empréstimos -->
+                        <div id="painelEmprestimos" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Empréstimos</h3>
+                            </div>
+                            <div id="conteudoEmprestimos">
+                                <!-- Conteúdo carregado via JavaScript -->
+                            </div>
+                        </div>
+                    
+                        <!-- Painel Reservas -->
+                        <div id="painelReservas" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Reservas</h3>
+                            </div>
+                            <div id="conteudoReservas">
+                                <!-- Conteúdo carregado via JavaScript -->
+                            </div>
+                        </div>
+                    
+                        <!-- Painel Usuários -->
+                        <div id="painelUsuarios" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Usuários</h3>
+                            </div>
+                            <div class="tabela-container">
+                                <table class="tabela-dados">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Usuário</th>
+                                            <th>E-mail</th>
+                                            <th>Tipo</th>
+                                            <th>Data Cadastro</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaUsuariosBody">
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    
+                        <!-- Painel Comentários -->
+                        <div id="painelComentarios" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Comentários</h3>
+                            </div>
+                            <div id="conteudoComentarios">
+                                <!-- Conteúdo carregado via JavaScript -->
+                            </div>
+                        </div>
+                    
+                        <!-- Painel Configurações -->
+                        <div id="painelConfiguracoes" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Configurações do Sistema</h3>
+                            </div>
+                            <div id="conteudoConfiguracoes">
+                                <!-- Conteúdo carregado via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                            <div class="graficos-dashboard">
+                                <div class="grafico-card">
+                                    <h4>Livros por Gênero</h4>
+                                    <div class="grafico-barras" id="graficoGeneros">
+                                        <!-- Gráfico será gerado dinamicamente -->
+                                    </div>
+                                </div>
+                                <div class="grafico-card">
+                                    <h4>Empréstimos Mensais</h4>
+                                    <div class="grafico-linha" id="graficoEmprestimos">
+                                        <!-- Gráfico será gerado dinamicamente -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alertas-dashboard">
+                                <h4>Alertas do Sistema</h4>
+                                <div class="lista-alertas" id="listaAlertas">
+                                    <!-- Alertas carregados dinamicamente -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Painel Adicionar Livro -->
+                        <div id="painelAdicionarLivro" class="painel-conteudo">
+                            <h3>Adicionar Novo Livro</h3>
+                            <form id="formAdicionarLivro" class="formulario-admin">
+                                <div class="formulario-linha">
+                                    <div class="campo-formulario">
+                                        <label for="tituloLivro">Título do Livro *</label>
+                                        <input type="text" id="tituloLivro" required>
+                                    </div>
+                                    <div class="campo-formulario">
+                                        <label for="autorLivro">Autor *</label>
+                                        <input type="text" id="autorLivro" required>
+                                    </div>
+                                </div>
+
+                                <div class="formulario-linha">
+                                    <div class="campo-formulario">
+                                        <label for="generoLivro">Gênero *</label>
+                                        <select id="generoLivro" required>
+                                            <option value="">Selecione o gênero</option>
+                                            <option value="ficcao">Ficção</option>
+                                            <option value="romance">Romance</option>
+                                            <option value="fantasia">Fantasia</option>
+                                            <option value="aventura">Aventura</option>
+                                            <option value="misterio">Mistério</option>
+                                            <option value="biografia">Biografia</option>
+                                            <option value="historia">História</option>
+                                            <option value="ciencia">Ciência</option>
+                                            <option value="tecnologia">Tecnologia</option>
+                                            <option value="autoajuda">Autoajuda</option>
+                                        </select>
+                                    </div>
+                                    <div class="campo-formulario">
+                                        <label for="anoLivro">Ano de Publicação *</label>
+                                        <input type="number" id="anoLivro" min="1000" max="2024" required>
+                                    </div>
+                                </div>
+
+                                <div class="formulario-linha">
+                                    <div class="campo-formulario">
+                                        <label for="editoraLivro">Editora *</label>
+                                        <input type="text" id="editoraLivro" required>
+                                    </div>
+                                    <div class="campo-formulario">
+                                        <label for="paginasLivro">Número de Páginas</label>
+                                        <input type="number" id="paginasLivro" min="1">
+                                    </div>
+                                </div>
+
+                                <div class="campo-formulario">
+                                    <label for="descricaoLivro">Descrição *</label>
+                                    <textarea id="descricaoLivro" rows="4" required></textarea>
+                                </div>
+
+                                <div class="formulario-linha">
+                                    <div class="campo-formulario">
+                                        <label for="imagemLivro">URL da Capa</label>
+                                        <input type="text" id="imagemLivro" placeholder="https://exemplo.com/capa.jpg">
+                                        <small>Deixe em branco para usar imagem padrão</small>
+                                    </div>
+                                    <div class="campo-formulario">
+                                        <label for="estoqueLivro">Quantidade em Estoque *</label>
+                                        <input type="number" id="estoqueLivro" min="0" value="1" required>
+                                    </div>
+                                </div>
+
+                                <div class="formulario-linha">
+                                    <div class="campo-formulario">
+                                        <label for="valorEmprestimo">Valor do Empréstimo (R$)</label>
+                                        <input type="number" id="valorEmprestimo" min="0" step="0.01" value="0">
+                                    </div>
+                                    <div class="campo-formulario">
+                                        <label for="taxaJuros">Taxa de Juros Diária (%)</label>
+                                        <input type="number" id="taxaJuros" min="0" step="0.01" value="0.5">
+                                    </div>
+                                </div>
+
+                                <div class="campo-formulario">
+                                    <label for="prazoEmprestimo">Prazo de Empréstimo (dias)</label>
+                                    <input type="number" id="prazoEmprestimo" min="1" value="14">
+                                </div>
+
+                                <div class="acoes-formulario">
+                                    <button type="submit" class="botao botao-primario">
+                                        <i class="fas fa-plus-circle"></i>
+                                        Adicionar Livro
+                                    </button>
+                                    <button type="button" class="botao botao-secundario" onclick="limparFormularioLivro()">
+                                        <i class="fas fa-eraser"></i>
+                                        Limpar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Painel Gerenciar Livros -->
+                        <div id="painelLivros" class="painel-conteudo">
+                            <div class="cabecalho-painel">
+                                <h3>Gerenciar Livros</h3>
+                                <div class="controles-painel">
+                                    <button class="botao botao-primario" onclick="abrirPainelAdmin('adicionar-livro')">
+                                        <i class="fas fa-plus"></i>
+                                        Novo Livro
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tabela-container">
+                                <table class="tabela-dados">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Autor</th>
+                                            <th>Gênero</th>
+                                            <th>Ano</th>
+                                            <th>Estoque</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaLivrosBody">
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Outros painéis... -->
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -268,12 +570,12 @@
                             <i class="fas fa-book-open"></i>
                             <div>
                                 <h3>Biblioteca Cesf Online</h3>
-                                <p>Parceria com Biblioteca Cesta</p>
+                                <p>Centro Educacional Superior de Formação</p>
                             </div>
                         </div>
                         <p class="descricao-footer">
-                            Sistema integrado de gerenciamento de biblioteca digital e física 
-                            com catálogo completo, empréstimos online e ferramentas avançadas.
+                            Sistema de gerenciamento de biblioteca digital com catálogo completo, 
+                            empréstimos online e ferramentas administrativas avançadas.
                         </p>
                     </div>
 
@@ -282,15 +584,15 @@
                         <ul class="links-footer">
                             <li><a href="#" onclick="filtrarPorGenero('')">Catálogo Completo</a></li>
                             <li><a href="#" onclick="filtrarPorDisponibilidade('disponivel')">Livros Disponíveis</a></li>
-                            <li><a href="#" onclick="sistemaParceria.mostrarModal()">Pedir Livro Físico</a></li>
-                            <li><a href="#" onclick="abrirModal('modalPoliticaPrivacidade')">Política de Privacidade</a></li>
+                            <li><a href="#" onclick="abrirPainelAdmin('dashboard')">Área Administrativa</a></li>
+                            <li><a href="#">Sobre o Sistema</a></li>
                         </ul>
                     </div>
 
                     <div class="secao-footer">
                         <h4>Contato</h4>
                         <div class="info-contato">
-                            <p><i class="fas fa-map-marker-alt"></i> Rua das Bibliotecas, 123 - Centro</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Rua das Bibliotecas, 123 - Centro, São Paulo - SP</p>
                             <p><i class="fas fa-phone"></i> (11) 3456-7890</p>
                             <p><i class="fas fa-envelope"></i> contato@bibliotecacesf.com</p>
                             <p><i class="fas fa-clock"></i> Segunda a Sexta: 8h às 18h</p>
@@ -298,14 +600,11 @@
                     </div>
 
                     <div class="secao-footer">
-                        <h4>Parceria</h4>
-                        <div class="parceria-info">
-                            <div class="logo-parceiro">
-                                <i class="fas fa-school"></i>
-                                <strong>Biblioteca Cesta</strong>
-                            </div>
-                            <p>Colégio Sagrada Família</p>
-                            <p>Campo Largo - PR</p>
+                        <h4>Desenvolvido por</h4>
+                        <div class="creditos">
+                            <p><strong>CESF - Centro Educacional</strong></p>
+                            <p>Sistema de Biblioteca Online</p>
+                            <p>Versão 2.0</p>
                         </div>
                     </div>
                 </div>
@@ -313,61 +612,127 @@
                 <div class="rodape-footer">
                     <p>&copy; 2024 Biblioteca Cesf Online. Todos os direitos reservados.</p>
                     <div class="links-rodape">
-                        <a href="#" onclick="abrirModal('modalPoliticaPrivacidade')">Política de Privacidade</a>
+                        <a href="#">Política de Privacidade</a>
                         <a href="#">Termos de Uso</a>
-                        <a href="#">Suporte</a>
+                        <a href="#">Mapa do Site</a>
                     </div>
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- Modal Login -->
+    <!-- Modal de Login - CORRIGIDO -->
 <div id="modalLogin" class="modal">
     <div class="modal-conteudo">
-        <div class="modal-header">
-            <h2>Login</h2>
-            <button class="btn-fechar" onclick="fecharModal('modalLogin')">&times;</button>
+        <div class="modal-cabecalho">
+            <h2>Acessar Sistema</h2>
+            <button class="fechar-modal" onclick="fecharModal('modalLogin')">&times;</button>
         </div>
-        <form id="formLogin">
-            <input type="text" id="inputUsuario" placeholder="Usuário ou E-mail" required>
-            <input type="password" id="inputSenha" placeholder="Senha" required>
-            <label>
-                <input type="checkbox" id="lembrarLogin"> Lembrar login
-            </label>
-            <button type="submit">Entrar</button>
-        </form>
+        <div class="modal-corpo">
+            <form id="formLogin" class="formulario-modal">
+                <div class="campo-formulario">
+                    <label for="inputUsuario">Usuário ou E-mail</label>
+                    <input type="text" id="inputUsuario" required placeholder="Digite seu usuário ou e-mail">
+                </div>
+                <div class="campo-formulario">
+                    <label for="inputSenha">Senha</label>
+                    <input type="password" id="inputSenha" required placeholder="Digite sua senha">
+                </div>
+                <div class="opcoes-login">
+                    <label class="checkbox">
+                        <input type="checkbox" id="lembrarLogin">
+                        <span class="checkmark"></span>
+                        Lembrar de mim
+                    </label>
+                    <a href="#" class="link-esqueci">Esqueci a senha</a>
+                </div>
+                <button type="submit" class="botao botao-primario botao-grande">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar no Sistema
+                </button>
+            </form>
+
+            <!-- Login Rápido para Testes - CORRIGIDO -->
+            <div class="login-rapido">
+                <h4>Login Rápido para Testes</h4>
+                <div class="botoes-login-rapido">
+                    <button type="button" class="botao botao-primario botao-login-rapido" onclick="loginRapido('admin')">
+                        <i class="fas fa-user-shield"></i>
+                        Entrar como Admin
+                    </button>
+                    <button type="button" class="botao botao-primario botao-login-rapido" onclick="loginRapido('joao')">
+                        <i class="fas fa-user"></i>
+                        Entrar como João
+                    </button>
+                    <button type="button" class="botao botao-primario botao-login-rapido" onclick="loginRapido('maria')">
+                        <i class="fas fa-user"></i>
+                        Entrar como Maria
+                    </button>
+                </div>
+                <p style="text-align: center; margin-top: 10px; font-size: 12px; color: var(--cinza-medio);">
+                    Senha: <strong>Usuario123!</strong> para todas as contas
+                </p>
+            </div>
+
+            <div class="rodape-modal">
+                <p>Não tem uma conta? <a href="#" onclick="fecharModal('modalLogin'); mostrarCadastro()">Cadastre-se aqui</a></p>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Modal Cadastro -->
-<div id="modalCadastro" class="modal">
-    <div class="modal-conteudo">
-        <div class="modal-header">
-            <h2>Cadastro</h2>
-            <button class="btn-fechar" onclick="fecharModal('modalCadastro')">&times;</button>
-        </div>
-        <form id="formCadastro">
-            <input type="text" id="inputNomeCompleto" placeholder="Nome Completo" required>
-            <input type="email" id="inputEmail" placeholder="E-mail" required>
-            <input type="text" id="inputUsuarioCadastro" placeholder="Nome de Usuário" required>
-            <input type="password" id="inputSenhaCadastro" placeholder="Senha" required>
-            <div id="indicadorForcaSenha">
-                <div id="barraForcaSenha" class="barra-forca-senha"></div>
-                <span id="textoForcaSenha"></span>
+    <!-- Modal de Cadastro -->
+    <div id="modalCadastro" class="modal">
+        <div class="modal-conteudo">
+            <div class="modal-cabecalho">
+                <h2>Criar Nova Conta</h2>
+                <button class="fechar-modal" onclick="fecharModal('modalCadastro')">&times;</button>
             </div>
-            <input type="password" id="inputConfirmarSenha" placeholder="Confirmar Senha" required>
-            <select id="selectTipoUsuario">
-                <option value="usuario">Usuário</option>
-                <option value="admin">Administrador</option>
-            </select>
-            <label>
-                <input type="checkbox" id="checkTermos"> Aceito os termos de uso
-            </label>
-            <button type="submit">Cadastrar</button>
-        </form>
-    </div>
-</div>
+            <div class="modal-corpo">
+                <form id="formCadastro" class="formulario-modal">
+                    <div class="campo-formulario">
+                        <label for="inputNomeCompleto">Nome Completo *</label>
+                        <input type="text" id="inputNomeCompleto" required>
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="inputEmail">E-mail *</label>
+                        <input type="email" id="inputEmail" required>
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="inputUsuarioCadastro">Nome de Usuário *</label>
+                        <input type="text" id="inputUsuarioCadastro" required>
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="inputSenhaCadastro">Senha *</label>
+                        <input type="password" id="inputSenhaCadastro" required>
+                        <div class="indicador-forca-senha">
+                            <div class="barra-forca-senha" id="barraForcaSenha"></div>
+                            <span class="texto-forca-senha" id="textoForcaSenha">Senha fraca</span>
+                        </div>
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="inputConfirmarSenha">Confirmar Senha *</label>
+                        <input type="password" id="inputConfirmarSenha" required>
+                    </div>
+                    <div class="campo-formulario">
+                        <label for="selectTipoUsuario">Tipo de Conta</label>
+                        <select id="selectTipoUsuario">
+                            <option value="usuario">Usuário Normal</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="termos-uso">
+                        <label class="checkbox">
+                            <input type="checkbox" id="checkTermos" required>
+                            <span class="checkmark"></span>
+                            Concordo com os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="botao botao-primario botao-grande">
+                        <i class="fas fa-user-plus"></i>
+                        Criar Minha Conta
+                    </button>
+                </form>
                 <div class="rodape-modal">
                     <p>Já tem uma conta? <a href="#" onclick="fecharModal('modalCadastro'); mostrarLogin()">Faça login aqui</a></p>
                 </div>
@@ -379,7 +744,7 @@
     <div id="modalDetalhesLivro" class="modal modal-grande">
         <div class="modal-conteudo">
             <div class="modal-cabecalho">
-                <h2><i class="fas fa-book"></i> Detalhes do Livro</h2>
+                <h2>Detalhes do Livro</h2>
                 <button class="fechar-modal" onclick="fecharModal('modalDetalhesLivro')">&times;</button>
             </div>
             <div class="modal-corpo" id="conteudoDetalhesLivro">
@@ -388,39 +753,8 @@
         </div>
     </div>
 
-    <!-- Modal Política de Privacidade -->
-    <div id="modalPoliticaPrivacidade" class="modal">
-        <div class="modal-conteudo modal-grande">
-            <div class="modal-cabecalho">
-                <h2><i class="fas fa-shield-alt"></i> Política de Privacidade</h2>
-                <button class="fechar-modal" onclick="fecharModal('modalPoliticaPrivacidade')">&times;</button>
-            </div>
-            <div class="modal-corpo">
-                <div class="politica-conteudo">
-                    <!-- Conteúdo da política de privacidade -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Pedido Livro Físico -->
-    <div id="modalPedidoLivro" class="modal">
-        <div class="modal-conteudo">
-            <div class="modal-cabecalho">
-                <h2><i class="fas fa-shipping-fast"></i> Pedir Livro Físico</h2>
-                <button class="fechar-modal" onclick="fecharModal('modalPedidoLivro')">&times;</button>
-            </div>
-            <div class="modal-corpo" id="conteudoPedidoLivro">
-                <!-- Conteúdo carregado dinamicamente -->
-            </div>
-        </div>
-    </div>
-
     <!-- Sistema de Mensagens -->
     <div id="sistemaMensagens" class="sistema-mensagens"></div>
-
-    <!-- Painel de Notificações -->
-    <div id="painelNotificacoes" class="painel-notificacoes" style="display: none;"></div>
 
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
